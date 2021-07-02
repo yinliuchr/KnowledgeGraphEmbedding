@@ -31,6 +31,9 @@ then
 
 echo "Start Training......"
 
+# bash run.sh train RotatE FB15k 0 0 1024 256 1000 24.0 1.0 0.0001 150000 16 -de
+#               1     2      3     4 5 6   7   8    9    10  11     12    13
+
 CUDA_VISIBLE_DEVICES=$GPU_DEVICE python3 -u $CODE_PATH/run.py --do_train \
     --cuda \
     --do_valid \
