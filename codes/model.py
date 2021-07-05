@@ -18,6 +18,10 @@ from torch.utils.data import DataLoader
 
 from dataloader import TestDataset
 
+# bash run.sh train RotatE FB15k    0       0      1024        256               1000         24.0    1.0   0.0001 150000         16               -de
+#               1     2      3       4      5        6          7                   8          9       10     11     12           13
+#              mode model  dataset  GPU  saveid    batchsize   neg_sample_size  hidden_dim    gamma   alpha   lr    Max_steps  test_batchsize
+
 class KGEModel(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, gamma, 
                  double_entity_embedding=False, double_relation_embedding=False):
