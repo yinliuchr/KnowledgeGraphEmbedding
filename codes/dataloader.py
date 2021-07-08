@@ -37,14 +37,14 @@ class TrainDataset(Dataset):
 
         while negative_sample_size < self.negative_sample_size:
             negative_sample = np.random.randint(self.nentity, size=self.negative_sample_size*2)
-            if self.mode == 'head-batch':
+            if self.mode == 'head-batch':       # corrupted head (h', r, t)
                 mask = np.in1d(
                     negative_sample, 
                     self.true_head[(relation, tail)], 
                     assume_unique=True, 
                     invert=True
                 )
-            elif self.mode == 'tail-batch':
+            elif self.mode == 'tail-batch':     # corrupted tail  (h, r, t')
                 mask = np.in1d(
                     negative_sample, 
                     self.true_tail[(head, relation)], 
