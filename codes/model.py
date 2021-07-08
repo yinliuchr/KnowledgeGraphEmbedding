@@ -18,6 +18,10 @@ from torch.utils.data import DataLoader
 
 from dataloader import TestDataset
 
+# bash run.sh train RotatE FB15k    0       0      1024        256               1000         24.0    1.0   0.0001 150000         16               -de
+#               1     2      3       4      5        6          7                   8          9       10     11     12           13
+#              mode model  dataset  GPU  saveid    batchsize   neg_sample_size  hidden_dim    gamma   alpha   lr    Max_steps  test_batchsize
+
 class KGEModel(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, gamma, 
                  double_entity_embedding=False, double_relation_embedding=False):
@@ -101,26 +105,29 @@ class KGEModel(nn.Module):
             ).unsqueeze(1)
             
         elif mode == 'head-batch':
-            tail_part, head_part = sample
-            batch_size, negative_sample_size = head_part.size(0), head_part.size(1)
+            tail_part, head_part = sample           # tail part: 1024 * 3 (1024 positive triples)
+                                                    # head part: 1024 * 256 (each row represent neg sample ids of the corresponding positive triple)
+                                                    # in other words, each positive triplet have 256 negetive triplets
+            batch_size, negative_sample_size = head_part.size(0), head_part.size(1)     # 1024 256
             
             head = torch.index_select(
                 self.entity_embedding, 
                 dim=0, 
                 index=head_part.view(-1)
-            ).view(batch_size, negative_sample_size, -1)
+            ).view(batch_size, negative_sample_size, -1)                # indexes * entity_dim: (1024 * 256) * entity_dim
+                                                                        # corrupted head
             
             relation = torch.index_select(
                 self.relation_embedding, 
                 dim=0, 
                 index=tail_part[:, 1]
-            ).unsqueeze(1)
+            ).unsqueeze(1)                                              # 1024 * 1 * entity_dim
             
             tail = torch.index_select(
                 self.entity_embedding, 
                 dim=0, 
                 index=tail_part[:, 2]
-            ).unsqueeze(1)
+            ).unsqueeze(1)                                              # 1024 * 1 * entity_dim
             
         elif mode == 'tail-batch':
             head_part, tail_part = sample
@@ -198,33 +205,38 @@ class KGEModel(nn.Module):
         return score
 
     def RotatE(self, head, relation, tail, mode):
+        # head (if corrupted): 1024 * 256 * ent_dim         (ent_dim = hidden_dim * 2)
+        # relation: 1024 * 1 * hidden_dim
+        # tail: 1024 * 1 * ent_dim
+        # mode: (here assume to be 'head_batch')
+
         pi = 3.14159265358979323846
         
-        re_head, im_head = torch.chunk(head, 2, dim=2)
-        re_tail, im_tail = torch.chunk(tail, 2, dim=2)
+        re_head, im_head = torch.chunk(head, 2, dim=2)          # both 1024 * 256 * hid_dim
+        re_tail, im_tail = torch.chunk(tail, 2, dim=2)          # both 1024 * 1 * hid_dim
 
         #Make phases of relations uniformly distributed in [-pi, pi]
 
         phase_relation = relation/(self.embedding_range.item()/pi)
 
-        re_relation = torch.cos(phase_relation)
-        im_relation = torch.sin(phase_relation)
+        re_relation = torch.cos(phase_relation)             # 1024 * 1 * hid_dim
+        im_relation = torch.sin(phase_relation)             # 1024 * 1 * hid_dim
 
         if mode == 'head-batch':
-            re_score = re_relation * re_tail + im_relation * im_tail
-            im_score = re_relation * im_tail - im_relation * re_tail
-            re_score = re_score - re_head
-            im_score = im_score - im_head
+            re_score = re_relation * re_tail + im_relation * im_tail       # 1024 * 1 * hid_dim
+            im_score = re_relation * im_tail - im_relation * re_tail        # 1024 * 1 * hid_dim
+            re_score = re_score - re_head                                   # 1024 * 256 * hid_dim
+            im_score = im_score - im_head                                   # 1024 * 256 * hid_dim
         else:
             re_score = re_head * re_relation - im_head * im_relation
             im_score = re_head * im_relation + im_head * re_relation
             re_score = re_score - re_tail
             im_score = im_score - im_tail
 
-        score = torch.stack([re_score, im_score], dim = 0)
-        score = score.norm(dim = 0)
+        score = torch.stack([re_score, im_score], dim = 0)          # # 2 * 1024 * 256 * hid_dim
+        score = score.norm(dim = 0)                                 # 1024 * 256 * hid_dim
 
-        score = self.gamma.item() - score.sum(dim = 2)
+        score = self.gamma.item() - score.sum(dim = 2)              # 1024 * 256
         return score
 
     def pRotatE(self, head, relation, tail, mode):
