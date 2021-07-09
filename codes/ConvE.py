@@ -130,7 +130,7 @@ class ConvModel(nn.Module):
             negative_sample = negative_sample.cuda()
             subsampling_weight = subsampling_weight.cuda()
 
-        positive_score = model(positive_sample, 'single')
+        positive_score = model(positive_sample)
         # positive_score = 1.0 - positive_score
         # positive_score = F.logsigmoid(positive_score).squeeze(dim=1)
 
