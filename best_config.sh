@@ -1,3 +1,5 @@
+bash run.sh train ConvE FB15k-237 0 0 1024 256 1000 9.0 1.0 0.00005 100000 16
+
 # Best Configuration for RotatE
 #
 bash run.sh train RotatE FB15k 0 0 1024 256 1000 24.0 1.0 0.0001 150000 16 -de                  #
