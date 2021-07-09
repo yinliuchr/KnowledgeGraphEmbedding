@@ -17,6 +17,8 @@ from torch.utils.data import DataLoader
 
 from model import KGEModel
 
+from ConvE import ConvModel
+
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
@@ -39,8 +41,8 @@ def parse_args(args=None):
     
     parser.add_argument('--data_path', type=str, default=None)
     parser.add_argument('--model', default='TransE', type=str)
-    parser.add_argument('-de', '--double_entity_embedding', action='store_true')
-    parser.add_argument('-dr', '--double_relation_embedding', action='store_true')
+    parser.add_argument('-de', '--double_entity_embedding', action='store_false')       # default now is false, attention
+    parser.add_argument('-dr', '--double_relation_embedding', action='store_false')
     
     parser.add_argument('-n', '--negative_sample_size', default=128, type=int)
     parser.add_argument('-d', '--hidden_dim', default=500, type=int)
@@ -217,7 +219,8 @@ def main(args):
     
     #All true triples
     all_true_triples = train_triples + valid_triples + test_triples
-    
+
+
     kge_model = KGEModel(
         model_name=args.model,
         nentity=nentity,
@@ -226,7 +229,12 @@ def main(args):
         gamma=args.gamma,
         double_entity_embedding=args.double_entity_embedding,
         double_relation_embedding=args.double_relation_embedding
-    )
+    ) if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'DistMult'} else ConvModel(
+        model_name=args.model,
+        nentity=nentity,
+        nrelation=nrelation,
+        hidden_dim=args.hidden_dim,
+        gamma=args.gamma)
     
     logging.info('Model Parameter Configuration:')
     for name, param in kge_model.named_parameters():

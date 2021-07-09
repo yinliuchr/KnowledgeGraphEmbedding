@@ -187,6 +187,9 @@ class KGEModel(nn.Module):
         score = score.sum(dim = 2)
         return score
 
+    # def ConvE(self, head, relation, tail, mode):
+
+
     def ComplEx(self, head, relation, tail, mode):
         re_head, im_head = torch.chunk(head, 2, dim=2)
         re_relation, im_relation = torch.chunk(relation, 2, dim=2)
