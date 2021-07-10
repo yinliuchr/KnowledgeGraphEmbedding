@@ -35,7 +35,7 @@ def parse_args(args=None):
     parser.add_argument('--do_test', action='store_true')
     parser.add_argument('--evaluate_train', action='store_true', help='Evaluate on training data')
     
-    parser.add_argument('--countries', action='store_true', help='Use Countries S1/S2/S3 datasets')
+    parser.add_argument('--countries', action='store_false', help='Use Countries S1/S2/S3 datasets')     # default now is false
     parser.add_argument('--regions', type=int, nargs='+', default=None, 
                         help='Region Id for Countries S1/S2/S3 datasets, DO NOT MANUALLY SET')
     
