@@ -35,14 +35,14 @@ def parse_args(args=None):
     parser.add_argument('--do_test', action='store_true')
     parser.add_argument('--evaluate_train', action='store_true', help='Evaluate on training data')
     
-    parser.add_argument('--countries', action='store_false', help='Use Countries S1/S2/S3 datasets')     # default now is false
+    parser.add_argument('--countries', action='store_true', help='Use Countries S1/S2/S3 datasets')     # default now is false
     parser.add_argument('--regions', type=int, nargs='+', default=None, 
                         help='Region Id for Countries S1/S2/S3 datasets, DO NOT MANUALLY SET')
     
     parser.add_argument('--data_path', type=str, default=None)
     parser.add_argument('--model', default='TransE', type=str)
-    parser.add_argument('-de', '--double_entity_embedding', action='store_false')       # default now is false, attention
-    parser.add_argument('-dr', '--double_relation_embedding', action='store_false')
+    parser.add_argument('-de', '--double_entity_embedding', action='store_true')       # default now is false, attention
+    parser.add_argument('-dr', '--double_relation_embedding', action='store_true')
     
     parser.add_argument('-n', '--negative_sample_size', default=128, type=int)
     parser.add_argument('-d', '--hidden_dim', default=500, type=int)
