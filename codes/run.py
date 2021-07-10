@@ -106,13 +106,13 @@ def save_model(model, optimizer, save_variable_list, args):
         os.path.join(args.save_path, 'checkpoint')
     )
     
-    entity_embedding = model.entity_embedding.detach().cpu().numpy()
+    entity_embedding = model.entity_embedding.detach().cpu().numpy() if args.model != 'ConvE' else model.entity_embedding.weight.detach().cpu().numpy()
     np.save(
         os.path.join(args.save_path, 'entity_embedding'), 
         entity_embedding
     )
     
-    relation_embedding = model.relation_embedding.detach().cpu().numpy()
+    relation_embedding = model.relation_embedding.detach().cpu().numpy() if args.model != 'ConvE' else model.relation_embedding.weight.detach().cpu().numpy()
     np.save(
         os.path.join(args.save_path, 'relation_embedding'), 
         relation_embedding
