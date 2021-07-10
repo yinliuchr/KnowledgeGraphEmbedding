@@ -28,18 +28,6 @@ class ConvModel(nn.Module):
         self.model_name = model_name
         self.nentity = nentity
         self.nrelation = nrelation
-        # self.hidden_dim = hidden_dim
-        # self.epsilon = 2.0
-        #
-        # self.gamma = nn.Parameter(
-        #     torch.Tensor([gamma]),
-        #     requires_grad=False
-        # )
-
-        # self.embedding_range = nn.Parameter(
-        #     torch.Tensor([(self.gamma.item() + self.epsilon) / hidden_dim]),
-        #     requires_grad=False
-        # )
 
         self.entity_dim = hidden_dim
         self.relation_dim = hidden_dim
@@ -71,7 +59,7 @@ class ConvModel(nn.Module):
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
-        self.fc = torch.nn.Linear(9728, self.embedding_dim)
+        self.fc = torch.nn.Linear(14848, self.embedding_dim)
 
     def init(self):
         xavier_normal_(self.entity_embedding.weight.data)
@@ -201,6 +189,10 @@ class ConvModel(nn.Module):
         }
 
         return log
+
+
+
+
 
     @staticmethod
     def test_step(model, test_triples, all_true_triples, args):
