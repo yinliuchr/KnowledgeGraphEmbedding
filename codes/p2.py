@@ -41,3 +41,10 @@ b = y.T
 print(b)
 b[:,1] = a
 print(b)
+
+
+print('\n\n\n')
+
+a = torch.nn.Embedding(3,5)
+print('Emb: ', a.weight)
+print(a.weight.detach().cpu().numpy())
