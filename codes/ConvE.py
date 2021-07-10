@@ -146,8 +146,12 @@ class ConvModel(nn.Module):
                 ori_sam = positive_sample[i].repeat(ns,1)
                 ori_sam[:,2] = negative_sample[i]
                 neg_sam.append(ori_sam)
-        neg_sam = torch.cat(neg_sam, dim=0)
 
+        neg_sam = torch.cat(neg_sam, dim=0)
+        print(neg_sam.size())
+
+        if args.cuda:
+            neg_sam = neg_sam.cuda()
         negative_score = model(neg_sam)
 
         positive_sample_loss = 1.0 - positive_score.mean()
