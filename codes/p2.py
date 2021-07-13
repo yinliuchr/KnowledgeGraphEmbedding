@@ -48,3 +48,9 @@ print('\n\n\n')
 a = torch.nn.Embedding(3,5)
 print('Emb: ', a.weight)
 print(a.weight.detach().cpu().numpy())
+
+
+print('\n\n\n')
+a1, a2, a3 = torch.tensor([1,2,3]), torch.tensor([4,5,6]), torch.tensor([7,8,9])
+a = torch.cat([a1,a2,a3], dim= 0)
+print(a)
