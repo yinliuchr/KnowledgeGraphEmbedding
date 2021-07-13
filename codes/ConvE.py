@@ -78,29 +78,31 @@ class ConvModel(nn.Module):
         rel_embedded = self.relation_embedding(relation).view(-1, 1, self.emb_dim1, self.emb_dim2)
         e2_embedded = self.entity_embedding(tail).view(-1, 1, self.emb_dim1, self.emb_dim2)
 
-        print('\n**************************\ne1_dim: ', e1_embedded.size(),
-              '\trel: ', rel_embedded.size(),
-              '\te2: ', e2_embedded.size())
+        # print('\n**************************\ne1_dim: ', e1_embedded.size(),
+        #       '\trel: ', rel_embedded.size(),
+        #       '\te2: ', e2_embedded.size())
 
         stacked_inputs = torch.cat([e1_embedded, rel_embedded, e2_embedded], 2)   # shape: [size, 1, 20*3, 10]
-        print('init_x_size: ', stacked_inputs.size())
+        # print('init_x_size: ', stacked_inputs.size())
 
         stacked_inputs = self.bn0(stacked_inputs)
-        print('1: ', stacked_inputs.size())
+        # print('1: ', stacked_inputs.size())
         x= self.inp_drop(stacked_inputs)
-        print('2: ', x.size())
+        # print('2: ', x.size())
         x= self.conv1(x)
-        print('3: ', x.size())
+        # print('3: ', x.size())
         x= self.bn1(x)
-        print('4: ', x.size())
+        # print('4: ', x.size())
         x= F.relu(x)
-        print('5: ', x.size())
+        # print('5: ', x.size())
         x = self.feature_map_drop(x)
-        print('6: ', x.size())
+        # print('6: ', x.size())
         x = x.view(x.shape[0], -1)
-        print('7: ', x.size())
+        # print('7: ', x.size())
         x = self.fc(x)
-        print('8: ', x.size())
+        # print('8: ', x.size())
+        x = torch.sigmoid(x)
+        # print('9: ', x.size())
         # x = self.hidden_drop(x)
         # print('9: ', x.size())
         # x = self.bn2(x)
@@ -114,7 +116,7 @@ class ConvModel(nn.Module):
         # pred = torch.sigmoid(x)
         # print('14: ', x.size())
 
-        print('************************* \n')
+        # print('************************* \n')
 
         return x
 
@@ -306,13 +308,13 @@ class ConvModel(nn.Module):
                                 ori_sam[:, 0] = negative_sample[i]
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
-                                print('\n**************************\nori_sam_dim: ', ori_sam.size(),
-                                      'Model(ori_sam)_dim: ', model(ori_sam).size(),
-                                      '\t\tfilterbias[i].size: ', filter_bias[i].size(),
-                                      '\n**************************\n')
+                                # print('\n**************************\nori_sam_dim: ', ori_sam.size(),
+                                #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
+                                #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
+                                #       '\n**************************\n')
                                 temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)        # size: (1, 14951)
-                                print('\n**************************\nTemp_score_dim: ', temp_score.size(),
-                                      '\n**************************\n')
+                                # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
+                                #       '\n**************************\n')
                                 score.append(temp_score)
 
                                 # neg_sam.append(ori_sam)
@@ -322,13 +324,13 @@ class ConvModel(nn.Module):
                                 ori_sam[:, 2] = negative_sample[i]
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
-                                print('\n**************************\nori_sam_dim: ', ori_sam.size(),
-                                      'Model(ori_sam)_dim: ', model(ori_sam).size(),
-                                      '\t\tfilterbias[i].size: ', filter_bias[i].size(),
-                                      '\n**************************\n')
+                                # print('\n**************************\nori_sam_dim: ', ori_sam.size(),
+                                #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
+                                #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
+                                #       '\n**************************\n')
                                 temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)       # size: (1, 14951)
-                                print('\n**************************\nTemp_score_dim: ', temp_score.size(),
-                                      '\n**************************\n')
+                                # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
+                                #       '\n**************************\n')
                                 score.append(temp_score)
                                 # neg_sam.append(ori_sam)
 
@@ -339,7 +341,7 @@ class ConvModel(nn.Module):
                         # score += filter_bias
 
                         # Explicitly sort all the entities to ensure that there is no test exposure bias
-                        print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
+                        # print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
 
                         argsort = torch.argsort(score, dim=1, descending=True)
 
