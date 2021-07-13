@@ -281,6 +281,8 @@ class ConvModel(nn.Module):
                             for i in range(bs):
                                 ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
                                 ori_sam[:, 0] = negative_sample[i]
+                                if args.cuda:
+                                    ori_sam = ori_sam.cuda()
                                 temp_score = model(ori_sam).squeeze() + filter_bias[i]        # size: (14951)
                                 score.append(temp_score)
 
@@ -289,6 +291,8 @@ class ConvModel(nn.Module):
                             for i in range(bs):
                                 ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
                                 ori_sam[:, 2] = negative_sample[i]
+                                if args.cuda:
+                                    ori_sam = ori_sam.cuda()
                                 temp_score = model(ori_sam).squeeze() + filter_bias[i]
                                 score.append(temp_score)
                                 # neg_sam.append(ori_sam)
