@@ -78,26 +78,42 @@ class ConvModel(nn.Module):
         e2_embedded = self.entity_embedding(tail).view(-1, 1, self.emb_dim1, self.emb_dim2)
 
         print('\n**************************\ne1_dim: ', e1_embedded.size(),
-              '\t\trel: ', rel_embedded.size(),
-              '\t\te2: ', e2_embedded.size(),
-              '\n**************************\n')
+              '\trel: ', rel_embedded.size(),
+              '\te2: ', e2_embedded.size())
 
         stacked_inputs = torch.cat([e1_embedded, rel_embedded, e2_embedded], 2)   # shape: [size, 1, 20*3, 10]
+        print('init_x_size: ', stacked_inputs.size())
 
         stacked_inputs = self.bn0(stacked_inputs)
+        print(stacked_inputs.size())
         x= self.inp_drop(stacked_inputs)
+        print(x.size())
         x= self.conv1(x)
+        print(x.size())
         x= self.bn1(x)
+        print(x.size())
         x= F.relu(x)
+        print(x.size())
         x = self.feature_map_drop(x)
+        print(x.size())
         x = x.view(x.shape[0], -1)
+        print(x.size())
         x = self.fc(x)
+        print(x.size())
         x = self.hidden_drop(x)
+        print(x.size())
         x = self.bn2(x)
+        print(x.size())
         x = F.relu(x)
+        print(x.size())
         x = torch.mm(x, self.entity_embedding.weight.transpose(1,0))
+        print(x.size())
         x += self.b.expand_as(x)
+        print(x.size())
         pred = torch.sigmoid(x)
+        print(x.size())
+
+        print('************************* \n')
 
         return pred
 
@@ -285,7 +301,7 @@ class ConvModel(nn.Module):
                         score = []
                         if mode == 'head-batch':
                             for i in range(bs):
-                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
+                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14541 * 3
                                 ori_sam[:, 0] = negative_sample[i]
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
