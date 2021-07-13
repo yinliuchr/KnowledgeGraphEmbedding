@@ -406,7 +406,7 @@ class KGEModel(nn.Module):
                         score = model((positive_sample, negative_sample), mode)
                         score += filter_bias
 
-                        print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
+                        # print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
 
 
                         #Explicitly sort all the entities to ensure that there is no test exposure bias

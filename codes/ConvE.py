@@ -275,6 +275,7 @@ class ConvModel(nn.Module):
                         # positive_score = model(positive_sample)
 
                         bs, ns = negative_sample.size(0), negative_sample.size(1)       # 16, 14951
+
                         ori_sam = None
                         score = []
                         if mode == 'head-batch':
@@ -284,6 +285,8 @@ class ConvModel(nn.Module):
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
                                 temp_score = model(ori_sam).squeeze() + filter_bias[i]        # size: (14951)
+                                print('\n**************************\nTemp_score_dim: ', temp_score.size(),
+                                      '\n**************************\n')
                                 score.append(temp_score)
 
                                 # neg_sam.append(ori_sam)
@@ -294,6 +297,8 @@ class ConvModel(nn.Module):
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
                                 temp_score = model(ori_sam).squeeze() + filter_bias[i]
+                                print('\n**************************\nTemp_score_dim: ', temp_score.size(),
+                                      '\n**************************\n')
                                 score.append(temp_score)
                                 # neg_sam.append(ori_sam)
 
