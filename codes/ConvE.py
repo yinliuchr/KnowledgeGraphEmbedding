@@ -168,9 +168,9 @@ class ConvModel(nn.Module):
 
         # positive_sample_loss = 1.0 - positive_score
 
-        print('\n**************************\npos_score_dim: ', positive_score.size(),
-              '\t\ttarget_dim: ', torch.tensor([1.]).expand_as(positive_score).size(),
-              '\n**************************\n')
+        # print('\n**************************\npos_score_dim: ', positive_score.size(),
+        #       '\t\ttarget_dim: ', torch.tensor([1.]).expand_as(positive_score).size(),
+        #       '\n**************************\n')
 
         loss = nn.BCELoss()
         pos_tar = torch.tensor([1.]).expand_as(positive_score)
