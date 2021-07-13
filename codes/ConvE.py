@@ -173,7 +173,12 @@ class ConvModel(nn.Module):
               '\n**************************\n')
 
         loss = nn.BCELoss()
-        positive_sample_loss = loss(positive_score, torch.tensor([1.]).expand_as(positive_score))
+        pos_tar = torch.tensor([1.]).expand_as(positive_score)
+        neg_tar = torch.tensor([0.]).expand_as(negative_score)
+        if args.cuda:
+            pos_tar = pos_tar.cuda()
+            neg_tar = neg_tar.cuda()
+        positive_sample_loss = loss(positive_score, pos_tar)
 
 
 
@@ -181,7 +186,7 @@ class ConvModel(nn.Module):
 
         # negative_sample_loss = negative_score.mean()
 
-        negative_sample_loss = loss(negative_score, torch.tensor([0.]).expand_as(negative_score))
+        negative_sample_loss = loss(negative_score, neg_tar)
         loss = positive_sample_loss + negative_sample_loss
 
         # negative_score = model((positive_sample, negative_sample), mode=mode)
