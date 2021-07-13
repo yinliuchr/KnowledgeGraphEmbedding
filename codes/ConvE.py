@@ -284,7 +284,8 @@ class ConvModel(nn.Module):
                                 ori_sam[:, 0] = negative_sample[i]
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
-                                print('\n**************************\nModel(ori_sam)_dim: ', model(ori_sam).size(),
+                                print('\n**************************\nori_sam_dim: ', ori_sam.size(),
+                                      'Model(ori_sam)_dim: ', model(ori_sam).size(),
                                       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
                                       '\n**************************\n')
                                 temp_score = model(ori_sam) + filter_bias[i]        # size: (14951)
@@ -299,7 +300,8 @@ class ConvModel(nn.Module):
                                 ori_sam[:, 2] = negative_sample[i]
                                 if args.cuda:
                                     ori_sam = ori_sam.cuda()
-                                print('\n**************************\nModel(ori_sam)_dim: ', model(ori_sam).size(),
+                                print('\n**************************\nori_sam_dim: ', ori_sam.size(),
+                                      'Model(ori_sam)_dim: ', model(ori_sam).size(),
                                       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
                                       '\n**************************\n')
                                 temp_score = model(ori_sam) + filter_bias[i]
