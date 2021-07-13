@@ -123,7 +123,7 @@ class ConvModel(nn.Module):
 
 
     @staticmethod
-    def train_step(self, model, optimizer, train_iterator, args):
+    def train_step( model, optimizer, train_iterator, args):
         '''
         A single train step. Apply back-propation and return the loss
         '''
@@ -167,9 +167,9 @@ class ConvModel(nn.Module):
         negative_score = model(neg_sam)
 
         # positive_sample_loss = 1.0 - positive_score
-        positive_sample_loss = self.loss(positive_score, torch.tensor([1.0]).expand_as(positive_score))
+        positive_sample_loss = nn.BCELoss(positive_score, torch.tensor([1.0]).expand_as(positive_score))
         # negative_sample_loss = negative_score.mean()
-        negative_sample_loss = self.loss(negative_score, torch.tensor([0.0]).expand_as(negative_score))
+        negative_sample_loss = nn.BCELoss(negative_score, torch.tensor([0.0]).expand_as(negative_score))
         loss = positive_sample_loss + negative_sample_loss
 
         # negative_score = model((positive_sample, negative_sample), mode=mode)
