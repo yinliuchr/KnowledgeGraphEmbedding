@@ -11,6 +11,8 @@ import random
 import numpy as np
 import torch
 
+import torch.nn as nn
+
 from torch.utils.data import DataLoader
 
 from model import KGEModel
@@ -56,8 +58,14 @@ a = torch.cat([a1,a2,a3], dim= 0)
 print(a)
 
 print('\n\n\n')
-a = torch.tensor([1.0])
-b = torch.randn((3,2))
-# a = 1.0
-print(a.expand_as(b))
-print(b)
+
+input = torch.randn((3,2), requires_grad=True)
+target = torch.empty((3,2)).random_(3)
+print(input)
+print(target)
+loss = nn.BCELoss()
+m = nn.Sigmoid()
+output  =  loss(m(input), target)
+print('output', output)
+
+
