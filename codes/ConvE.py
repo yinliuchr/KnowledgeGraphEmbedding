@@ -116,7 +116,7 @@ class ConvModel(nn.Module):
 
         print('************************* \n')
 
-        return pred
+        return x
 
 
 
