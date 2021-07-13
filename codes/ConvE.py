@@ -160,7 +160,7 @@ class ConvModel(nn.Module):
                 neg_sam.append(ori_sam)
 
         neg_sam = torch.cat(neg_sam, dim=0)
-        print(neg_sam.size())
+        # print(neg_sam.size())
 
         if args.cuda:
             neg_sam = neg_sam.cuda()
