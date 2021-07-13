@@ -172,14 +172,16 @@ class ConvModel(nn.Module):
               '\t\ttarget_dim: ', torch.tensor([1.]).expand_as(positive_score).size(),
               '\n**************************\n')
 
-        positive_sample_loss = nn.BCELoss(positive_score, torch.tensor([1.]).expand_as(positive_score))
+        loss = nn.BCELoss()
+        positive_sample_loss = loss(positive_score, torch.tensor([1.]).expand_as(positive_score))
 
 
 
 
 
         # negative_sample_loss = negative_score.mean()
-        negative_sample_loss = nn.BCELoss(negative_score, torch.tensor([0.]).expand_as(negative_score))
+
+        negative_sample_loss = loss(negative_score, torch.tensor([0.]).expand_as(negative_score))
         loss = positive_sample_loss + negative_sample_loss
 
         # negative_score = model((positive_sample, negative_sample), mode=mode)
