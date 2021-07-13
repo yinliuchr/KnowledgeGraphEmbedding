@@ -331,7 +331,8 @@ class ConvModel(nn.Module):
                                 #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
                                 #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
                                 #       '\n**************************\n')
-                                temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)        # size: (1, 14951)
+                                # temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)        # size: (1, 14951)
+                                temp_score = (model(ori_sam).squeeze()).unsqueeze(0)        # size: (1, 14951)
                                 # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
                                 #       '\n**************************\n')
                                 score.append(temp_score)
@@ -347,7 +348,8 @@ class ConvModel(nn.Module):
                                 #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
                                 #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
                                 #       '\n**************************\n')
-                                temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)       # size: (1, 14951)
+                                # temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)       # size: (1, 14951)
+                                temp_score = (model(ori_sam).squeeze()).unsqueeze(0)  # size: (1, 14951)
                                 # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
                                 #       '\n**************************\n')
                                 score.append(temp_score)
