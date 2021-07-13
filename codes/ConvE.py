@@ -77,6 +77,11 @@ class ConvModel(nn.Module):
         rel_embedded = self.relation_embedding(relation).view(-1, 1, self.emb_dim1, self.emb_dim2)
         e2_embedded = self.entity_embedding(tail).view(-1, 1, self.emb_dim1, self.emb_dim2)
 
+        print('\n**************************\ne1_dim: ', e1_embedded.size(),
+              '\t\trel: ', rel_embedded.size(),
+              '\t\te2: ', e2_embedded.size(),
+              '\n**************************\n')
+
         stacked_inputs = torch.cat([e1_embedded, rel_embedded, e2_embedded], 2)   # shape: [size, 1, 20*3, 10]
 
         stacked_inputs = self.bn0(stacked_inputs)
