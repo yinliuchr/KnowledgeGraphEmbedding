@@ -304,6 +304,8 @@ class ConvModel(nn.Module):
                         # score += filter_bias
 
                         # Explicitly sort all the entities to ensure that there is no test exposure bias
+                        print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
+
                         argsort = torch.argsort(score, dim=1, descending=True)
 
                         if mode == 'head-batch':
