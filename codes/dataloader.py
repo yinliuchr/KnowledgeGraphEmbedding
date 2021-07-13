@@ -137,6 +137,7 @@ class TestDataset(Dataset):
             tmp = [(0, rand_head) if (rand_head, relation, tail) not in self.triple_set
                    else (-1, head) for rand_head in range(self.nentity)]
             tmp[head] = (0, head)
+            # e.g., (0,0), (0,1), (-1, 25), (-1,25), (0,4), (-1,25) ..., (-1,25), (0,25), (0,26)
         elif self.mode == 'tail-batch':
             tmp = [(0, rand_tail) if (head, relation, rand_tail) not in self.triple_set
                    else (-1, tail) for rand_tail in range(self.nentity)]
