@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 from model import KGEModel
 
 from dataloader import TrainDataset
+from dataloader import TestDataset
 from dataloader import BidirectionalOneShotIterator
 
 a_data_path = "../data/FB15k"
@@ -95,18 +96,58 @@ train_dataloader_tail = DataLoader(
     collate_fn=TrainDataset.collate_fn
 )
 
+
+test_dataloader_head = DataLoader(
+                TestDataset(
+                    test_triples,
+                    all_true_triples,
+                    a_nentity,
+                    a_nrelation,
+                    'head-batch'
+                ),
+                batch_size=a_test_batchsize,
+                # num_workers=max(1, args.cpu_num // 2),
+                collate_fn=TestDataset.collate_fn
+)
+
+test_dataloader_tail = DataLoader(
+    TestDataset(
+        test_triples,
+        all_true_triples,
+        a_nentity,
+        a_nrelation,
+        'tail-batch'
+    ),
+    batch_size=a_test_batchsize,
+    # num_workers=max(1, args.cpu_num // 2),
+    collate_fn=TestDataset.collate_fn
+)
+
 train_iterator = BidirectionalOneShotIterator(train_dataloader_head, train_dataloader_tail)
 
 #############################################
-for i in range(4):
-    positive_sample, negative_sample, subsampling_weight, mode = next(train_iterator)
-    print(positive_sample.size())
-    print(positive_sample[0])
-    print(positive_sample[1023])
-    print(negative_sample.size())
-    print(negative_sample[0])
-    print(subsampling_weight.size())
-    print(mode, '\n\n')
+
+positive_sample, negative_sample, subsampling_weight, mode = next(train_iterator)
+print(positive_sample.size())
+print(positive_sample[0])
+print(positive_sample[1023])
+print(negative_sample.size())
+print(negative_sample[0])
+print(subsampling_weight.size())
+print(mode, '\n\n')
+
+for ps, ns, fb, m in test_dataloader_head:
+    print(ps.size())
+    print(ps[0], '\n')
+    print(ns.size())
+    print(ns[0], '\n')
+    print(fb.data.size)
+    print(fb[15][14900:], '\n')
+    print(m)
+    break
+
+
+
 
 # current_learning_rate = a_lr
 # optimizer = torch.optim.Adam(

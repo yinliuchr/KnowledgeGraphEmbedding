@@ -272,8 +272,32 @@ class ConvModel(nn.Module):
 
                         batch_size = positive_sample.size(0)
 
-                        score = model((positive_sample, negative_sample), mode)
-                        score += filter_bias
+                        # positive_score = model(positive_sample)
+
+                        bs, ns = negative_sample.size(0), negative_sample.size(1)       # 16, 14951
+                        ori_sam = None
+                        score = []
+                        if mode == 'head-batch':
+                            for i in range(bs):
+                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
+                                ori_sam[:, 0] = negative_sample[i]
+                                temp_score = model(ori_sam).squeeze() + filter_bias[i]        # size: (14951)
+                                score.append(temp_score)
+
+                                # neg_sam.append(ori_sam)
+                        elif mode == 'tail-batch':
+                            for i in range(bs):
+                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
+                                ori_sam[:, 2] = negative_sample[i]
+                                temp_score = model(ori_sam).squeeze() + filter_bias[i]
+                                score.append(temp_score)
+                                # neg_sam.append(ori_sam)
+
+                        score = torch.cat(score, dim=0)             # 16 * 14951
+                        # neg_sam = torch.cat(neg_sam, dim=0)         # (16 * 14951) * 3
+
+                        # score = model((positive_sample, negative_sample), mode)
+                        # score += filter_bias
 
                         # Explicitly sort all the entities to ensure that there is no test exposure bias
                         argsort = torch.argsort(score, dim=1, descending=True)
