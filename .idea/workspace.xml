@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c540150e-0840-49f9-a9aa-0b84266c40d0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codes/ConvE.py" beforeDir="false" afterPath="$PROJECT_DIR$/codes/ConvE.py" afterDir="false" />
-    </list>
+    <list default="true" id="c540150e-0840-49f9-a9aa-0b84266c40d0" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +47,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
-  <component name="RunManager" selected="Python.play">
+  <component name="RunManager" selected="Python.p2">
     <configuration name="p2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="KnowledgeGraphEmbedding" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,8 +94,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.play" />
         <item itemvalue="Python.p2" />
+        <item itemvalue="Python.play" />
       </list>
     </recent_temporary>
   </component>
@@ -110,7 +107,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1625177086938</updated>
-      <workItem from="1625177091038" duration="61925000" />
+      <workItem from="1625177091038" duration="62244000" />
     </task>
     <servers />
   </component>
