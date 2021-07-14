@@ -168,17 +168,22 @@ class ConvModel(nn.Module):
 
         # positive_sample_loss = 1.0 - positive_score
 
-        # print('\n**************************\npos_score_dim: ', positive_score.size(),
-        #       '\t\ttarget_dim: ', torch.tensor([1.]).expand_as(positive_score).size(),
-        #       '\n**************************\n')
+        print('\n**************************\npos_score_dim: ', positive_score.size(),
+              '\t\tneg_score_dim: ', negative_score.size(),
+              '\n**************************\n')
 
-        loss = nn.BCELoss()
+
+        ''' Todo: 
+        combine pos and neg 
+        model.loss
+        '''
+        # loss = nn.BCELoss()
         pos_tar = torch.tensor([1.]).expand_as(positive_score)
         neg_tar = torch.tensor([0.]).expand_as(negative_score)
         if args.cuda:
             pos_tar = pos_tar.cuda()
             neg_tar = neg_tar.cuda()
-        positive_sample_loss = loss(positive_score, pos_tar)
+        positive_sample_loss = model.loss(positive_score, pos_tar)
 
 
 
@@ -186,7 +191,7 @@ class ConvModel(nn.Module):
 
         # negative_sample_loss = negative_score.mean()
 
-        negative_sample_loss = loss(negative_score, neg_tar)
+        negative_sample_loss = model.loss(negative_score, neg_tar)
         loss = positive_sample_loss + negative_sample_loss
 
         # negative_score = model((positive_sample, negative_sample), mode=mode)
@@ -220,7 +225,7 @@ class ConvModel(nn.Module):
         else:
             regularization_log = {}
 
-        loss.backward()
+        model.loss.backward()
 
         optimizer.step()
 
