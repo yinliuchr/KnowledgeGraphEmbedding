@@ -60,8 +60,8 @@ class ConvModel(nn.Module):
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
         # self.fc = torch.nn.Linear(14848, self.embedding_dim)
-        self.fc1 = torch.nn.Linear(14848, 1024)
-        self.fc2 = torch.nn.Linear(1024, 128)
+        self.fc1 = torch.nn.Linear(14848, 128)
+        self.fc2 = torch.nn.Linear(128, 1)
 
     def init(self):
         xavier_normal_(self.entity_embedding.weight.data)
@@ -122,7 +122,7 @@ class ConvModel(nn.Module):
 
         # print('************************* \n')
 
-        return x            # batch_size * 128
+        return x            # batch_size * 1
 
 
 

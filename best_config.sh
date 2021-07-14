@@ -5,7 +5,7 @@ bash run.sh train ConvE FB15k-237 1 4 128 256 200 9.0 1.0 0.00002 100000 16
 bash run.sh train ConvE FB15k-237 1 5 128 256 200 9.0 1.0 0.00005 100000 16
 bash run.sh train ConvE FB15k-237 1 6 128 256 200 9.0 1.0 0.0001 100000 16
 
-bash run.sh train ConvE FB15k-237 0 9 128 256 200 9.0 1.0 0.0001 100000 16
+bash run.sh train ConvE FB15k-237 0 10 128 256 200 9.0 1.0 0.0001 100000 16
 
 
 
