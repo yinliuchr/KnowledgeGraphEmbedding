@@ -69,3 +69,8 @@ output  =  loss(m(input), target)
 print('output', output)
 
 
+print('\n\n\n')
+e = nn.Embedding(2,3)
+print(e.weight)
+
+
