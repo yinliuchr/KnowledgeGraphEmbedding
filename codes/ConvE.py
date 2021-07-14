@@ -194,6 +194,8 @@ class ConvModel(nn.Module):
         negative_sample_loss = model.loss(negative_score, neg_tar)
         loss = positive_sample_loss + negative_sample_loss
 
+        print("\n\nloss: ", loss, '\n\n')
+
         # negative_score = model((positive_sample, negative_sample), mode=mode)
         #
         # if args.negative_adversarial_sampling:
@@ -225,7 +227,7 @@ class ConvModel(nn.Module):
         else:
             regularization_log = {}
 
-        model.loss.backward()
+        loss.backward()
 
         optimizer.step()
 
