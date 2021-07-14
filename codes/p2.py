@@ -74,3 +74,8 @@ e = nn.Embedding(2,3)
 print(e.weight)
 
 
+print('\n\n\n')
+input = torch.randn((2,3,3))
+print(torch.sigmoid(input))
+
+

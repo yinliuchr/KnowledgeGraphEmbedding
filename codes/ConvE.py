@@ -60,14 +60,15 @@ class ConvModel(nn.Module):
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
         # self.fc = torch.nn.Linear(14848, self.embedding_dim)
-        self.fc = torch.nn.Linear(14848, 1)
+        self.fc1 = torch.nn.Linear(14848, 1024)
+        self.fc2 = torch.nn.Linear(1024, 128)
 
     def init(self):
         xavier_normal_(self.entity_embedding.weight.data)
         xavier_normal_(self.relation_embedding.weight.data)
 
 
-    def forward(self, sample):              # sample is  size: (... ,3)
+    def forward(self, sample):              # sample is  size: (batch_size ,3)
 
         # batch_size = sample.size(0)
         head = sample[:, 0]
@@ -99,9 +100,10 @@ class ConvModel(nn.Module):
         # print('6: ', x.size())
         x = x.view(x.shape[0], -1)
         # print('7: ', x.size())
-        x = self.fc(x)
+        x = self.fc1(x)
+        x = self.fc2(x)
         # print('8: ', x.size())
-        x = torch.sigmoid(x)
+
         # print('9: ', x.size())
         # x = self.hidden_drop(x)
         # print('9: ', x.size())
@@ -110,6 +112,8 @@ class ConvModel(nn.Module):
         # x = F.relu(x)
         # print('11: ', x.size())
         # x = torch.mm(x, self.entity_embedding.weight.transpose(1,0))
+
+        x = torch.sigmoid(x)
         # print('12: ', x.size())
         # x += self.b.expand_as(x)
         # print('13: ', x.size())
@@ -118,7 +122,7 @@ class ConvModel(nn.Module):
 
         # print('************************* \n')
 
-        return x
+        return x            # batch_size * 128
 
 
 
@@ -380,6 +384,8 @@ class ConvModel(nn.Module):
 
                         argsort = torch.argsort(score, dim=1, descending=True)
 
+                        # 16 * 14951 , each row : [234, 24, 0, 190 ..., ]
+
                         if mode == 'head-batch':
                             positive_arg = positive_sample[:, 0]
                         elif mode == 'tail-batch':
@@ -400,6 +406,7 @@ class ConvModel(nn.Module):
                                 'HITS@1': 1.0 if ranking <= 1 else 0.0,
                                 'HITS@3': 1.0 if ranking <= 3 else 0.0,
                                 'HITS@10': 1.0 if ranking <= 10 else 0.0,
+                                'HITS@1000': 1.0 if ranking <= 1000 else 0.0,
                             })
 
                         if step % args.test_log_steps == 0:
