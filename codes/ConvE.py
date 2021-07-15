@@ -22,8 +22,7 @@ from torch.utils.data import DataLoader
 from dataloader import TestDataset
 
 class ConvModel(nn.Module):
-    def __init__(self, model_name, nentity, nrelation, hidden_dim, gamma,
-                 double_entity_embedding=False, double_relation_embedding=False):
+    def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
         super(ConvModel, self).__init__()
         self.model_name = model_name
         self.nentity = nentity
@@ -33,25 +32,14 @@ class ConvModel(nn.Module):
         self.relation_dim = hidden_dim
         self.embedding_dim = hidden_dim
 
-        # self.entity_embedding_real = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
-        # self.entity_embedding_img = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
         self.entity_embedding = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
-
-        # nn.init.uniform_(
-        #     tensor=self.entity_embedding,
-        #     a=-self.embedding_range.item(),
-        #     b=self.embedding_range.item()
-        # )
-
-        # self.relation_embedding_real = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
-        # self.relation_embedding_img = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
         self.relation_embedding = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
 
-        self.inp_drop = torch.nn.Dropout(.2)
-        self.hidden_drop = torch.nn.Dropout(.3)
-        self.feature_map_drop = torch.nn.Dropout2d(.2)
+        self.inp_drop = torch.nn.Dropout(input_drop)
+        self.hidden_drop = torch.nn.Dropout(hidden_drop)
+        self.feature_map_drop = torch.nn.Dropout2d(feat_drop)
         self.loss = torch.nn.BCELoss()  # modify: cosine embedding loss / triplet loss
-        self.emb_dim1 = 20              # this is from the original configuration in ConvE
+        self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
         self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
@@ -59,70 +47,39 @@ class ConvModel(nn.Module):
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
-        # self.fc = torch.nn.Linear(14848, self.embedding_dim)
-        self.fc1 = torch.nn.Linear(14848, 128)
-        self.fc2 = torch.nn.Linear(128, 1)
+        self.fc = torch.nn.Linear(hidden_size, self.embedding_dim)
+
 
     def init(self):
         xavier_normal_(self.entity_embedding.weight.data)
         xavier_normal_(self.relation_embedding.weight.data)
 
 
-    def forward(self, sample):              # sample is  size: (batch_size ,3)
+    def forward(self, e1, rel):
 
-        # batch_size = sample.size(0)
-        head = sample[:, 0]
-        relation = sample[:,1]
-        tail = sample[:,2]
+        e1_embedded = self.entity_embedding(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)           # len(e1) *  1 * 20 * 10
+        rel_embedded = self.relation_embedding(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)       # len(rel) * 1 * 20 * 10       len(e1) = len(rel)
 
-        e1_embedded= self.entity_embedding(head).view(-1, 1, self.emb_dim1, self.emb_dim2)
-        rel_embedded = self.relation_embedding(relation).view(-1, 1, self.emb_dim1, self.emb_dim2)
-        e2_embedded = self.entity_embedding(tail).view(-1, 1, self.emb_dim1, self.emb_dim2)
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)                                  # len * 1 * 40 * 10
 
-        # print('\n**************************\ne1_dim: ', e1_embedded.size(),
-        #       '\trel: ', rel_embedded.size(),
-        #       '\te2: ', e2_embedded.size())
-
-        stacked_inputs = torch.cat([e1_embedded, rel_embedded, e2_embedded], 2)   # shape: [size, 1, 20*3, 10]
-        # print('init_x_size: ', stacked_inputs.size())
-
-        stacked_inputs = self.bn0(stacked_inputs)
-        # print('1: ', stacked_inputs.size())
-        x= self.inp_drop(stacked_inputs)
-        # print('2: ', x.size())
-        x= self.conv1(x)
-        # print('3: ', x.size())
-        x= self.bn1(x)
-        # print('4: ', x.size())
-        x= F.relu(x)
-        # print('5: ', x.size())
+        stacked_inputs = self.bn0(stacked_inputs)                   # len * 1 * 40 * 10
+        x = self.inp_drop(stacked_inputs)
+        x = self.conv1(x)                                           # len * 32 * 38 * 8
+        x = self.bn1(x)
+        x = F.relu(x)
         x = self.feature_map_drop(x)
-        # print('6: ', x.size())
-        x = x.view(x.shape[0], -1)
-        # print('7: ', x.size())
-        x = self.fc1(x)
-        x = self.fc2(x)
-        # print('8: ', x.size())
+        x = x.view(x.shape[0], -1)                                  # len * 9728
+        x = self.fc(x)                                              # len * 200
+        x = self.hidden_drop(x)
+        x = self.bn2(x)
+        x = F.relu(x)  # 1 * 200
+        x = torch.mm(x, self.entity_embedding.weight.transpose(1, 0))  # len * 200  @ (200 * # ent)  => len *  # ent
+        x += self.b.expand_as(x)
+        pred = torch.sigmoid(x)
 
-        # print('9: ', x.size())
-        # x = self.hidden_drop(x)
-        # print('9: ', x.size())
-        # x = self.bn2(x)
-        # print('10: ', x.size())
-        # x = F.relu(x)
-        # print('11: ', x.size())
-        # x = torch.mm(x, self.entity_embedding.weight.transpose(1,0))
+        return pred         # len * # ent
 
-        x = torch.sigmoid(x)
-        # print('12: ', x.size())
-        # x += self.b.expand_as(x)
-        # print('13: ', x.size())
-        # pred = torch.sigmoid(x)
-        # print('14: ', x.size())
 
-        # print('************************* \n')
-
-        return x            # batch_size * 1
 
 
 
@@ -134,98 +91,44 @@ class ConvModel(nn.Module):
 
         model.train()
 
+
         optimizer.zero_grad()
 
         positive_sample, negative_sample, subsampling_weight, mode = next(train_iterator)
+
+        if mode == 'head-batch': return None
         # mode = 'single'
         bs = positive_sample.size(0)        # e.g., 1024
         ns = negative_sample.size(1)        # e.g., 256
+
+        #  positive_sample: 1024 * 3
+        #  negative_sample: 1024 * 256
 
         if args.cuda:
             positive_sample = positive_sample.cuda()
             negative_sample = negative_sample.cuda()
             subsampling_weight = subsampling_weight.cuda()
 
-        positive_score = model(positive_sample)
-        # positive_score = 1.0 - positive_score
-        # positive_score = F.logsigmoid(positive_score).squeeze(dim=1)
-
-
-        neg_sam = []
-        if mode == 'head-batch':
-            for i in range(bs):
-                ori_sam = positive_sample[i].repeat(ns, 1)      # 256 * 3
-                ori_sam[:,0] = negative_sample[i]
-                neg_sam.append(ori_sam)
-        elif mode == 'tail-batch':
-            for i in range(bs):
-                ori_sam = positive_sample[i].repeat(ns,1)
-                ori_sam[:,2] = negative_sample[i]
-                neg_sam.append(ori_sam)
-
-        neg_sam = torch.cat(neg_sam, dim=0)
-        # print(neg_sam.size())
+        e1 = positive_sample[:,0]
+        rel = positive_sample[:, 1]
+        pred = model(e1, rel)           # bs * #ent
+        input = torch.empty((bs, (1 + ns)))
+        for i in range(bs):
+            input[i,0] = pred[i,positive_sample[i,2]]           # input: 1st column is score of the true entity
+            input[i,1:] = pred[i, negative_sample[i]]           # input: subsequent columns are scores of negative entities
+        target = torch.tensor([1.0] + [0.] * ns)
+        target = target.repeat(bs, 1)
 
         if args.cuda:
-            neg_sam = neg_sam.cuda()
-        negative_score = model(neg_sam)
+            input = input.cuda()
+            target = target.cuda()
 
-        # positive_sample_loss = 1.0 - positive_score
+        loss = model.loss(input, target)
 
         # print('\n**************************\npos_score_dim: ', positive_score.size(),
         #       '\t\tneg_score_dim: ', negative_score.size(),
         #       '\n**************************\n')
 
-
-        ''' Todo: 
-        combine pos and neg 
-        model.loss
-        '''
-        # loss = nn.BCELoss()
-        pos_tar = torch.tensor([1.]).expand_as(positive_score)
-        neg_tar = torch.tensor([0.]).expand_as(negative_score)
-        tar = torch.cat((pos_tar, neg_tar), dim=0)              # tar is (128 + 32768) * 1
-        if args.cuda:
-            # pos_tar = pos_tar.cuda()
-            # neg_tar = neg_tar.cuda()
-            tar = tar.cuda()
-
-
-        loss = model.loss(torch.cat((positive_score, negative_score), dim=0), tar)
-
-
-        # positive_sample_loss = model.loss(positive_score, pos_tar)
-
-
-
-
-
-        # negative_sample_loss = negative_score.mean()
-
-        # negative_sample_loss = model.loss(negative_score, neg_tar)
-        # loss = positive_sample_loss + negative_sample_loss
-
-        # print("\n\nloss: ", loss, '\n\n')
-
-        # negative_score = model((positive_sample, negative_sample), mode=mode)
-        #
-        # if args.negative_adversarial_sampling:
-        #     # In self-adversarial sampling, we do not apply back-propagation on the sampling weight
-        #     negative_score = (F.softmax(negative_score * args.adversarial_temperature, dim=1).detach()
-        #                       * F.logsigmoid(-negative_score)).sum(dim=1)
-        # else:
-        #     negative_score = F.logsigmoid(-negative_score).mean(dim=1)
-
-
-
-        # if args.uni_weight:
-        #     positive_sample_loss = - positive_score.mean()
-        #     negative_sample_loss = - negative_score.mean()
-        # else:
-        #     positive_sample_loss = - (subsampling_weight * positive_score).sum() / subsampling_weight.sum()
-        #     negative_sample_loss = - (subsampling_weight * negative_score).sum() / subsampling_weight.sum()
-        #
-        # loss = (positive_sample_loss + negative_sample_loss) / 2
 
         if args.regularization != 0.0:
             # Use L3 regularization for ComplEx and DistMult
@@ -326,6 +229,8 @@ class ConvModel(nn.Module):
             with torch.no_grad():
                 for test_dataset in test_dataset_list:
                     for positive_sample, negative_sample, filter_bias, mode in test_dataset:
+                        if mode != 'tail-batch':
+                            continue
                         if args.cuda:
                             positive_sample = positive_sample.cuda()
                             negative_sample = negative_sample.cuda()
@@ -333,51 +238,10 @@ class ConvModel(nn.Module):
 
                         batch_size = positive_sample.size(0)
 
-                        # positive_score = model(positive_sample)
+                        e1, rel = positive_sample[:,0], positive_sample[:,1]
+                        score = model(e1, rel)                              # bs * #ent
 
-                        bs, ns = negative_sample.size(0), negative_sample.size(1)       # 16, 14951
 
-                        ori_sam = None
-                        score = []
-                        if mode == 'head-batch':
-                            for i in range(bs):
-                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14541 * 3
-                                ori_sam[:, 0] = negative_sample[i]
-                                if args.cuda:
-                                    ori_sam = ori_sam.cuda()
-                                # print('\n**************************\nori_sam_dim: ', ori_sam.size(),
-                                #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
-                                #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
-                                #       '\n**************************\n')
-                                # temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)        # size: (1, 14951)
-                                temp_score = (model(ori_sam).squeeze()).unsqueeze(0)        # size: (1, 14951)
-                                # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
-                                #       '\n**************************\n')
-                                score.append(temp_score)
-
-                                # neg_sam.append(ori_sam)
-                        elif mode == 'tail-batch':
-                            for i in range(bs):
-                                ori_sam = positive_sample[i].repeat(ns, 1)  # 14951 * 3
-                                ori_sam[:, 2] = negative_sample[i]
-                                if args.cuda:
-                                    ori_sam = ori_sam.cuda()
-                                # print('\n**************************\nori_sam_dim: ', ori_sam.size(),
-                                #       'Model(ori_sam)_dim: ', model(ori_sam).size(),
-                                #       '\t\tfilterbias[i].size: ', filter_bias[i].size(),
-                                #       '\n**************************\n')
-                                # temp_score = (model(ori_sam).squeeze() + filter_bias[i]).unsqueeze(0)       # size: (1, 14951)
-                                temp_score = (model(ori_sam).squeeze()).unsqueeze(0)  # size: (1, 14951)
-                                # print('\n**************************\nTemp_score_dim: ', temp_score.size(),
-                                #       '\n**************************\n')
-                                score.append(temp_score)
-                                # neg_sam.append(ori_sam)
-
-                        score = torch.cat(score, dim=0)             # 16 * 14951
-                        # neg_sam = torch.cat(neg_sam, dim=0)         # (16 * 14951) * 3
-
-                        # score = model((positive_sample, negative_sample), mode)
-                        # score += filter_bias
 
                         # Explicitly sort all the entities to ensure that there is no test exposure bias
                         # print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
@@ -386,12 +250,7 @@ class ConvModel(nn.Module):
 
                         # 16 * 14951 , each row : [234, 24, 0, 190 ..., ]
 
-                        if mode == 'head-batch':
-                            positive_arg = positive_sample[:, 0]
-                        elif mode == 'tail-batch':
-                            positive_arg = positive_sample[:, 2]
-                        else:
-                            raise ValueError('mode %s not supported' % mode)
+                        positive_arg = positive_sample[:, 2]
 
                         for i in range(batch_size):
                             # Notice that argsort is not ranking

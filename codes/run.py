@@ -234,11 +234,22 @@ def main(args):
         nentity=nentity,
         nrelation=nrelation,
         hidden_dim=args.hidden_dim,
-        gamma=args.gamma)
+        input_drop=.2,
+        hidden_drop=.3,
+        feat_drop=.2,
+        emb_dim1=20,
+        hidden_size=9728)
+
+
     
     logging.info('Model Parameter Configuration:')
     for name, param in kge_model.named_parameters():
         logging.info('Parameter %s: %s, require_grad = %s' % (name, str(param.size()), str(param.requires_grad)))
+
+    params = [value.numel() for value in kge_model.parameters()]
+    print(params)
+    print(np.sum(params))
+
 
     if args.cuda:
         kge_model = kge_model.cuda()
@@ -287,6 +298,9 @@ def main(args):
     else:
         logging.info('Ramdomly Initializing %s Model...' % args.model)
         init_step = 0
+        if args.model == 'ConvE':
+            kge_model.init()
+
     
     step = init_step
     
