@@ -7,10 +7,12 @@ bash run.sh train ConvE FB15k-237 1 6 128 256 200 9.0 1.0 0.0001 100000 16
 
 bash run.sh train ConvE FB15k-237 0 10 128 256 200 9.0 1.0 0.0001 100000 16
 
-bash run.sh train ConvE FB15k-237 0 11 128 256 200 9.0 1.0 0.003 100000 16
+bash run.sh train ConvE FB15k-237 0 12 128 256 200 9.0 1.0 0.003 10000 128
 
 
-
+# bash run.sh train RotatE FB15k    0       0      1024        256               1000         24.0    1.0   0.0001 150000         16               -de
+#               1     2      3       4      5        6          7                   8          9       10     11     12           13
+#              mode model  dataset  GPU  saveid    batchsize   neg_sample_size  hidden_dim    gamma   alpha   lr    Max_steps  test_batchsize
 
 
 bash run.sh train ConvE FB15k-237 1 0 128 256 200 9.0 1.0 0.00002 100000 16
