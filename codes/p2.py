@@ -102,3 +102,7 @@ a = torch.tensor([5,2,4,6,8,1,9,3,6])
 b = 6
 print((a == b).nonzero())
 
+print('\n\n\n')
+a = None
+if not a: print('andioan')
+

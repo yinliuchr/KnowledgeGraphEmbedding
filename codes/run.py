@@ -325,6 +325,7 @@ def main(args):
         for step in range(init_step, args.max_steps):
             
             log = kge_model.train_step(kge_model, optimizer, train_iterator, args)
+            if not log: continue
             
             training_logs.append(log)
             
