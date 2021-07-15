@@ -59,8 +59,9 @@ print(a)
 
 print('\n\n\n')
 
-input = torch.randn((3,2), requires_grad=True)
-target = torch.empty((3,2)).random_(3)
+input = torch.randn((2,3), requires_grad=True)
+# target = torch.empty((2,3)).random_(3)
+target = torch.tensor([[.8,.4, 3.9], [-1.2, .3, 2.1]])
 print(input)
 print(target)
 loss = nn.BCELoss()
@@ -69,13 +70,35 @@ output  =  loss(m(input), target)
 print('output', output)
 
 
+# print('\n\n\n')
+# e = nn.Embedding(2,3)
+# print(e.weight)
+#
+#
+# print('\n\n\n')
+# input = torch.randn((2,3,3))
+# print(torch.sigmoid(input))
+
+
+
 print('\n\n\n')
-e = nn.Embedding(2,3)
-print(e.weight)
-
+# a = torch.tensor([[.8,.4, 3.9], [-1.2, .3, 2.1]])
+# # print(a[1,[1,2]])
+# target = torch.tensor([0.]).expand_as(a)
+# target[:,0] = torch.ones(2).view(2,1)
+# print(target)
+# # print(torch.ones(2))
+target = torch.tensor([1.0] + [0.] * 4)
+target = target.repeat(3,1)
+print(target)
 
 print('\n\n\n')
-input = torch.randn((2,3,3))
-print(torch.sigmoid(input))
+a = torch.tensor([[3,2,1,4],[5,7,3,8]])
+print(a)
+print(torch.argsort(a, dim=1, descending=True))
 
+print('\n\n\n')
+a = torch.tensor([5,2,4,6,8,1,9,3,6])
+b = 6
+print((a == b).nonzero())
 
