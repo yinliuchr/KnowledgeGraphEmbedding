@@ -73,6 +73,8 @@ def parse_args(args=None):
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
 
     parser.add_argument('--hidden_size', default=9728, type=int)
+
+    print('\n\n\naidonfin \n\n\n')
     
     return parser.parse_args(args)
 
