@@ -19,6 +19,8 @@ from model import KGEModel
 
 from ConvE import ConvModel
 
+from CoCoE import CoCoModel
+
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
@@ -69,6 +71,8 @@ def parse_args(args=None):
     
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
+
+    parser.add_argument('-hs', '--hidden_size', default=9728, type=int)
     
     return parser.parse_args(args)
 
@@ -88,6 +92,7 @@ def override_config(args):
     args.double_relation_embedding = argparse_dict['double_relation_embedding']
     args.hidden_dim = argparse_dict['hidden_dim']
     args.test_batch_size = argparse_dict['test_batch_size']
+    args.hidden_size = argparse_dict['hidden_size']
     
 def save_model(model, optimizer, save_variable_list, args):
     '''
@@ -221,15 +226,17 @@ def main(args):
     all_true_triples = train_triples + valid_triples + test_triples
 
 
-    kge_model = KGEModel(
+    if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'DistMult'}:
+        kge_model = KGEModel(
         model_name=args.model,
         nentity=nentity,
         nrelation=nrelation,
         hidden_dim=args.hidden_dim,
         gamma=args.gamma,
         double_entity_embedding=args.double_entity_embedding,
-        double_relation_embedding=args.double_relation_embedding
-    ) if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'DistMult'} else ConvModel(
+        double_relation_embedding=args.double_relation_embedding)
+    elif args.model =='ConvE':
+        kge_model = ConvModel(
         model_name=args.model,
         nentity=nentity,
         nrelation=nrelation,
@@ -239,6 +246,18 @@ def main(args):
         feat_drop=.2,
         emb_dim1=20,
         hidden_size=9728)
+    else:
+        kge_model = CoCoModel(
+        model_name=args.model,
+        nentity=nentity,
+        nrelation=nrelation,
+        hidden_dim=args.hidden_dim,
+        input_drop=.2,
+        hidden_drop=.3,
+        feat_drop=.2,
+        emb_dim1=20,
+        hidden_size=args.hidden_size)
+
 
 
     
