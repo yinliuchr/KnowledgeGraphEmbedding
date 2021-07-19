@@ -74,7 +74,7 @@ def parse_args(args=None):
 
     parser.add_argument('--hidden_size', default=9728, type=int)
 
-    # print('\n\n\naidonfin \n\n\n')
+    print('\n\n\naidonfin \n\n\n')
     
     return parser.parse_args(args)
 
