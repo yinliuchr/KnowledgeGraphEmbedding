@@ -54,6 +54,9 @@ def parse_args(args=None):
     parser.add_argument('-b', '--batch_size', default=1024, type=int)
     parser.add_argument('-r', '--regularization', default=0.0, type=float)
     parser.add_argument('--test_batch_size', default=4, type=int, help='valid/test batch size')
+
+    parser.add_argument('--hidden_size', default=9728, type=int, help='jbn')
+    
     parser.add_argument('--uni_weight', action='store_true', 
                         help='Otherwise use subsampling weighting like in word2vec')
     
@@ -72,7 +75,7 @@ def parse_args(args=None):
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
 
-    parser.add_argument('--hidden_size', default=9728, type=int)
+
 
     print('\n\n\naidonfin \n\n\n')
     
