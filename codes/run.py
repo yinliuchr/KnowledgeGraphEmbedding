@@ -77,7 +77,7 @@ def parse_args(args=None):
 
 
 
-    print('\n\n\naidonfin \n\n\n')
+    # print('\n\n\naidonfin \n\n\n')
     
     return parser.parse_args(args)
 
