@@ -170,6 +170,8 @@ def log_metrics(mode, step, metrics):
         
         
 def main(args):
+    print('\n\n\n 0 \n\n\n')
+
     if (not args.do_train) and (not args.do_valid) and (not args.do_test):
         raise ValueError('one of train/val/test mode must be choosed.')
 
