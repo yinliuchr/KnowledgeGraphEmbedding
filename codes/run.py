@@ -56,7 +56,7 @@ def parse_args(args=None):
     parser.add_argument('--test_batch_size', default=4, type=int, help='valid/test batch size')
 
     parser.add_argument('--hidden_size', default=9728, type=int, help='jbn')
-    
+
     parser.add_argument('--uni_weight', action='store_true', 
                         help='Otherwise use subsampling weighting like in word2vec')
     
@@ -97,9 +97,9 @@ def override_config(args):
     args.double_relation_embedding = argparse_dict['double_relation_embedding']
     args.hidden_dim = argparse_dict['hidden_dim']
     args.test_batch_size = argparse_dict['test_batch_size']
-    args.hidden_size = argparse_dict['hidden_size']
+    # args.hidden_size = argparse_dict['hidden_size']
 
-    print('\n\n\n 89382 \n\n\n')
+    # print('\n\n\n 89382 \n\n\n')
     
 def save_model(model, optimizer, save_variable_list, args):
     '''
@@ -173,30 +173,30 @@ def log_metrics(mode, step, metrics):
         
         
 def main(args):
-    print('\n\n\n 0 \n\n\n')
+    # print('\n\n\n 0 \n\n\n')
 
     if (not args.do_train) and (not args.do_valid) and (not args.do_test):
         raise ValueError('one of train/val/test mode must be choosed.')
 
-    print('\n\n\n 1 \n\n\n')
+    # print('\n\n\n 1 \n\n\n')
 
     if args.init_checkpoint:
         override_config(args)
     elif args.data_path is None:
         raise ValueError('one of init_checkpoint/data_path must be choosed.')
 
-    print('\n\n\n 2 \n\n\n')
+    # print('\n\n\n 2 \n\n\n')
 
     if args.do_train and args.save_path is None:
         raise ValueError('Where do you want to save your trained model?')
 
-    print('\n\n\n 3 \n\n\n')
+    # print('\n\n\n 3 \n\n\n')
     
     if args.save_path and not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
 
 
-    print('\n\n\n a \n\n\n')
+    # print('\n\n\n a \n\n\n')
 
     # Write logs to checkpoint and console
     set_logger(args)
@@ -213,7 +213,7 @@ def main(args):
             rid, relation = line.strip().split('\t')
             relation2id[relation] = int(rid)
 
-    print('\n\n\n b  \n\n\n')
+    # print('\n\n\n b  \n\n\n')
 
 
     # Read regions for Countries S* datasets
@@ -243,7 +243,7 @@ def main(args):
     test_triples = read_triple(os.path.join(args.data_path, 'test.txt'), entity2id, relation2id)
     logging.info('#test: %d' % len(test_triples))
 
-    print('\n\n\n c \n\n\n')
+    # print('\n\n\n c \n\n\n')
     
     #All true triples
     all_true_triples = train_triples + valid_triples + test_triples
@@ -279,9 +279,9 @@ def main(args):
         hidden_drop=.3,
         feat_drop=.2,
         emb_dim1=20,
-        hidden_size=args.hidden_size)
+        hidden_size=4608)
 
-    print('\n\n\n d \n\n\n')
+    # print('\n\n\n d \n\n\n')
     
     logging.info('Model Parameter Configuration:')
     for name, param in kge_model.named_parameters():
