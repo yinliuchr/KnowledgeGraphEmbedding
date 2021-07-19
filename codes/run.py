@@ -117,18 +117,26 @@ def save_model(model, optimizer, save_variable_list, args):
         'optimizer_state_dict': optimizer.state_dict()},
         os.path.join(args.save_path, 'checkpoint')
     )
-    
-    entity_embedding = model.entity_embedding.detach().cpu().numpy() if args.model != 'ConvE' else model.entity_embedding.weight.detach().cpu().numpy()
-    np.save(
-        os.path.join(args.save_path, 'entity_embedding'), 
-        entity_embedding
-    )
-    
-    relation_embedding = model.relation_embedding.detach().cpu().numpy() if args.model != 'ConvE' else model.relation_embedding.weight.detach().cpu().numpy()
-    np.save(
-        os.path.join(args.save_path, 'relation_embedding'), 
-        relation_embedding
-    )
+
+    if args.model == 'ConvE':
+        entity_embedding = model.entity_embedding.weight.detach().cpu().numpy()
+        relation_embedding = model.relation_embedding.weight.detach().cpu().numpy()
+        np.save(os.path.join(args.save_path, 'entity_embedding'), entity_embedding)
+        np.save(os.path.join(args.save_path, 'relation_embedding'), relation_embedding)
+    elif args.model == 'CoCo':
+        ent_real = model.ent_real.weight.detach().cpu().numpy()
+        ent_img = model.ent_img.weight.detach().cpu().numpy()
+        rel_real = model.rel_real.weight.detach().cpu().numpy()
+        rel_img = model.rel_img.weight.detach().cpu().numpy()
+        np.save(os.path.join(args.save_path, 'ent_real'), ent_real)
+        np.save(os.path.join(args.save_path, 'ent_img'), ent_img)
+        np.save(os.path.join(args.save_path, 'rel_real'), rel_real)
+        np.save(os.path.join(args.save_path, 'rel_img'), rel_img)
+    else:
+        entity_embedding = model.entity_embedding.detach().cpu().numpy()
+        relation_embedding = model.relation_embedding.detach().cpu().numpy()
+        np.save(os.path.join(args.save_path, 'entity_embedding'), entity_embedding)
+        np.save(os.path.join(args.save_path, 'relation_embedding'), relation_embedding)
 
 def read_triple(file_path, entity2id, relation2id):
     '''
@@ -340,6 +348,8 @@ def main(args):
         logging.info('Ramdomly Initializing %s Model...' % args.model)
         init_step = 0
         if args.model == 'ConvE':
+            kge_model.init()
+        if args.model == 'CoCo':
             kge_model.init()
 
     
