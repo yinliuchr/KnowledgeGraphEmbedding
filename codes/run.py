@@ -74,7 +74,7 @@ def parse_args(args=None):
 
     parser.add_argument('--hidden_size', default=9728, type=int)
 
-    print('\n\n\naidonfin \n\n\n')
+    # print('\n\n\naidonfin \n\n\n')
     
     return parser.parse_args(args)
 
@@ -95,6 +95,8 @@ def override_config(args):
     args.hidden_dim = argparse_dict['hidden_dim']
     args.test_batch_size = argparse_dict['test_batch_size']
     args.hidden_size = argparse_dict['hidden_size']
+
+    print('\n\n\n 89382 \n\n\n')
     
 def save_model(model, optimizer, save_variable_list, args):
     '''
@@ -181,7 +183,9 @@ def main(args):
     
     if args.save_path and not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
-    
+
+    print('\n\n\n a \n\n\n')
+
     # Write logs to checkpoint and console
     set_logger(args)
     
@@ -196,7 +200,10 @@ def main(args):
         for line in fin:
             rid, relation = line.strip().split('\t')
             relation2id[relation] = int(rid)
-    
+
+    print('\n\n\n b  \n\n\n')
+
+
     # Read regions for Countries S* datasets
     if args.countries:
         regions = list()
@@ -223,6 +230,8 @@ def main(args):
     logging.info('#valid: %d' % len(valid_triples))
     test_triples = read_triple(os.path.join(args.data_path, 'test.txt'), entity2id, relation2id)
     logging.info('#test: %d' % len(test_triples))
+
+    print('\n\n\n c \n\n\n')
     
     #All true triples
     all_true_triples = train_triples + valid_triples + test_triples
@@ -260,8 +269,7 @@ def main(args):
         emb_dim1=20,
         hidden_size=args.hidden_size)
 
-
-
+    print('\n\n\n d \n\n\n')
     
     logging.info('Model Parameter Configuration:')
     for name, param in kge_model.named_parameters():
