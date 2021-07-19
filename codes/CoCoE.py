@@ -126,10 +126,10 @@ class CoCoModel(nn.Module):
         rr = self.feature_map_drop(F.relu(self.bn1(self.conv3(rr))))
         ri = self.feature_map_drop(F.relu(self.bn1(self.conv4(ri))))
 
-        er = er.view(er.shape([0], -1))     # bs * 4608
-        ei = ei.view(ei.shape([0], -1))
-        rr = rr.view(rr.shape([0], -1))
-        ri = ri.view(ri.shape([0], -1))
+        er = er.view(er.shape[0], -1)     # bs * 4608
+        ei = ei.view(ei.shape[0], -1)
+        rr = rr.view(rr.shape[0], -1)
+        ri = ri.view(ri.shape[0], -1)
 
         er = F.relu(self.bn2(self.hidden_drop(self.fc1(er))))       # bs * 200
         ei = F.relu(self.bn2(self.hidden_drop(self.fc2(ei))))
