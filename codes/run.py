@@ -72,7 +72,7 @@ def parse_args(args=None):
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
 
-    parser.add_argument('-hs', '--hidden_size', default=9728, type=int)
+    parser.add_argument('--hidden_size', default=9728, type=int)
     
     return parser.parse_args(args)
 
