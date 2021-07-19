@@ -25,7 +25,6 @@ ALPHA=${10}
 LEARNING_RATE=${11}
 MAX_STEPS=${12}
 TEST_BATCH_SIZE=${13}
-
 HIDDEN_SIZE = ${14}
 
 if [ $MODE == "train" ]
