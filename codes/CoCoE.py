@@ -147,7 +147,7 @@ class CoCoModel(nn.Module):
 
         pred = torch.sigmoid(pred)
 
-                                                                            
+
 
         return pred         # len * # ent
 
