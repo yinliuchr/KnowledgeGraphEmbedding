@@ -172,17 +172,24 @@ def log_metrics(mode, step, metrics):
 def main(args):
     if (not args.do_train) and (not args.do_valid) and (not args.do_test):
         raise ValueError('one of train/val/test mode must be choosed.')
-    
+
+    print('\n\n\n 1 \n\n\n')
+
     if args.init_checkpoint:
         override_config(args)
     elif args.data_path is None:
         raise ValueError('one of init_checkpoint/data_path must be choosed.')
 
+    print('\n\n\n 2 \n\n\n')
+
     if args.do_train and args.save_path is None:
         raise ValueError('Where do you want to save your trained model?')
+
+    print('\n\n\n 3 \n\n\n')
     
     if args.save_path and not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
+
 
     print('\n\n\n a \n\n\n')
 
