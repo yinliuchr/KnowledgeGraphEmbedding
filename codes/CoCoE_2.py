@@ -138,7 +138,7 @@ class CoCoModel_2(nn.Module):
         self.fc4 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc = [self.fc1, self.fc2, self.fc3, self.fc4]
         '''
-
+        self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
 
 
 
