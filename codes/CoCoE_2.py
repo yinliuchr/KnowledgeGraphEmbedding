@@ -65,7 +65,6 @@ class CoCoModel_2(nn.Module):
 
 
 
-
     def init(self):
         xavier_normal_(self.ent_real.weight.data)
         xavier_normal_(self.ent_img.weight.data)
@@ -105,9 +104,7 @@ class CoCoModel_2(nn.Module):
         # optional: rrr, ... , iir via a FC, instead of + and -
 
         pred = rrr + rii + iri - iir
-
         pred += self.b.expand_as(pred)
-
         pred = torch.sigmoid(pred)
 
         return pred       # len * # ent
