@@ -21,6 +21,8 @@ from ConvE import ConvModel
 
 from CoCoE import CoCoModel
 
+from CoCoE_2 import CoCoModel_2
+
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
@@ -123,7 +125,7 @@ def save_model(model, optimizer, save_variable_list, args):
         relation_embedding = model.relation_embedding.weight.detach().cpu().numpy()
         np.save(os.path.join(args.save_path, 'entity_embedding'), entity_embedding)
         np.save(os.path.join(args.save_path, 'relation_embedding'), relation_embedding)
-    elif args.model == 'CoCo':
+    elif args.model in {'CoCo', 'CoCo2'}:
         ent_real = model.ent_real.weight.detach().cpu().numpy()
         ent_img = model.ent_img.weight.detach().cpu().numpy()
         rel_real = model.rel_real.weight.detach().cpu().numpy()
@@ -277,7 +279,7 @@ def main(args):
         feat_drop=.2,
         emb_dim1=20,
         hidden_size=9728)
-    else:
+    elif args.model == 'CoCo':
         kge_model = CoCoModel(
         model_name=args.model,
         nentity=nentity,
@@ -288,6 +290,18 @@ def main(args):
         feat_drop=.2,
         emb_dim1=20,
         hidden_size=4608)
+    else:
+        kge_model = CoCoModel_2(
+        model_name=args.model,
+        nentity=nentity,
+        nrelation=nrelation,
+        hidden_dim=args.hidden_dim,
+        input_drop=.2,
+        hidden_drop=.3,
+        feat_drop=.2,
+        emb_dim1=20,
+        hidden_size=4608)
+
 
     # print('\n\n\n d \n\n\n')
     
@@ -332,7 +346,7 @@ def main(args):
         if args.warm_up_steps:
             warm_up_steps = args.warm_up_steps
         else:
-            warm_up_steps = args.max_steps // 2
+            warm_up_steps = args.max_steps // 4
 
     if args.init_checkpoint:
         # Restore model from checkpoint directory
@@ -347,10 +361,10 @@ def main(args):
     else:
         logging.info('Ramdomly Initializing %s Model...' % args.model)
         init_step = 0
-        if args.model == 'ConvE':
+        if args.model in {'ConvE', 'CoCo', 'CoCo2'}:
             kge_model.init()
-        if args.model == 'CoCo':
-            kge_model.init()
+
+
 
     
     step = init_step
@@ -380,20 +394,36 @@ def main(args):
             
             training_logs.append(log)
             
-            if step >= warm_up_steps:
+            # if step >= warm_up_steps:
+            #     current_learning_rate = current_learning_rate / 10
+            #     logging.info('Change learning_rate to %f at step %d' % (current_learning_rate, step))
+            #     optimizer = torch.optim.Adam(
+            #         filter(lambda p: p.requires_grad, kge_model.parameters()),
+            #         lr=current_learning_rate
+            #     )
+            #     warm_up_steps = warm_up_steps * 3
+
+            if step == int(0.5 * args.max_steps):
                 current_learning_rate = current_learning_rate / 10
                 logging.info('Change learning_rate to %f at step %d' % (current_learning_rate, step))
                 optimizer = torch.optim.Adam(
-                    filter(lambda p: p.requires_grad, kge_model.parameters()), 
+                    filter(lambda p: p.requires_grad, kge_model.parameters()),
                     lr=current_learning_rate
                 )
-                warm_up_steps = warm_up_steps * 3
+            if step == int(0.75 * args.max_steps):
+                current_learning_rate = current_learning_rate / 10
+                logging.info('Change learning_rate to %f at step %d' % (current_learning_rate, step))
+                optimizer = torch.optim.Adam(
+                    filter(lambda p: p.requires_grad, kge_model.parameters()),
+                    lr=current_learning_rate
+                )
             
             if step % args.save_checkpoint_steps == 0:
                 save_variable_list = {
                     'step': step, 
-                    'current_learning_rate': current_learning_rate,
-                    'warm_up_steps': warm_up_steps
+                    'current_learning_rate': current_learning_rate
+                    # ,
+                    # 'warm_up_steps': warm_up_steps
                 }
                 save_model(kge_model, optimizer, save_variable_list, args)
                 
@@ -411,8 +441,9 @@ def main(args):
         
         save_variable_list = {
             'step': step, 
-            'current_learning_rate': current_learning_rate,
-            'warm_up_steps': warm_up_steps
+            'current_learning_rate': current_learning_rate
+            # ,
+            # 'warm_up_steps': warm_up_steps
         }
         save_model(kge_model, optimizer, save_variable_list, args)
         

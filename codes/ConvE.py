@@ -65,9 +65,15 @@ class ConvModel(nn.Module):
         stacked_inputs = self.bn0(stacked_inputs)                   # len * 1 * 40 * 10
         x = self.inp_drop(stacked_inputs)
         x = self.conv1(x)                                           # len * 32 * 38 * 8
+
+                                                                    # pooling ... len * 32 * 19 * 4
+
         x = self.bn1(x)
         x = F.relu(x)
         x = self.feature_map_drop(x)
+
+
+
         x = x.view(x.shape[0], -1)                                  # len * 9728
         x = self.fc(x)                                              # len * 200
         x = self.hidden_drop(x)

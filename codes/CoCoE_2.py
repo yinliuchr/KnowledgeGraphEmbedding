@@ -23,9 +23,9 @@ from dataloader import TestDataset
 
 from ConvE import ConvModel
 
-class CoCoModel(nn.Module):
+class CoCoModel_2(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
-        super(CoCoModel, self).__init__()
+        super(CoCoModel_2, self).__init__()
         self.model_name = model_name
         self.nentity = nentity
         self.nrelation = nrelation
@@ -33,11 +33,6 @@ class CoCoModel(nn.Module):
         self.entity_dim = hidden_dim
         self.relation_dim = hidden_dim
         self.embedding_dim = hidden_dim
-
-
-
-        # self.entity_embedding = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
-        # self.relation_embedding = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
 
         self.ent_real = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0)
         self.ent_img = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0)
@@ -51,28 +46,24 @@ class CoCoModel(nn.Module):
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
-        self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
-        self.conv2 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
-        self.conv3 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
-        self.conv4 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
-        # self.conv2 = torch.nn.Conv3d()
-        # self.conv2 = torch.nn.Conv2d(2,32 .... )
-        self.bn0 = torch.nn.BatchNorm2d(1)
-        self.bn1 = torch.nn.BatchNorm2d(32)
-        self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
+        self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
+        self.conv2 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
+        self.conv3 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
+        self.conv4 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
+        self.conv = [self.conv1, self.conv2, self.conv3, self.conv4]
+
+        self.bn0 = [torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1)]
+        self.bn1 = [torch.nn.BatchNorm2d(32), torch.nn.BatchNorm2d(32),torch.nn.BatchNorm2d(32),torch.nn.BatchNorm2d(32)]
+        self.bn2 = [torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim)]
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
 
-
-        '''
-        self.conv1 = ConvModel(...... )
-        self.conv2 = ConvModel(...... )
-        self.conv3 = ConvModel(...... )
-        self.conv4 = ConvModel(...... )
-        '''
         self.fc1 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc2 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc3 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc4 = torch.nn.Linear(hidden_size, self.embedding_dim)
+        self.fc = [self.fc1, self.fc2, self.fc3, self.fc4]
+
+
 
 
     def init(self):
@@ -83,101 +74,43 @@ class CoCoModel(nn.Module):
 
 
     def forward(self, e1, rel):
+        e1_real = self.ent_real(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
+        e1_img = self.ent_img(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
+        rel_real = self.rel_real(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
+        rel_img = self.rel_img(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
+
+        er = self.inp_drop(self.bn0[0](e1_real))  # bs * 1 * 20 * 10
+        ei = self.inp_drop(self.bn0[1](e1_img))
+        rr = self.inp_drop(self.bn0[2](rel_real))
+        ri = self.inp_drop(self.bn0[3](rel_img))
+
+        r_r = torch.cat([er,rr], dim=1)      # bs * 2 * 20 * 10   real_real
+        r_i = torch.cat([er,ri], dim=1)                         # real_img
+        i_r = torch.cat([ei,rr], dim=1)                         # img_real
+        i_i = torch.cat([ei,ri], dim=1)                         # img_img
+
+        for i, fm in enumerate([r_r, r_i, i_r, i_i]):
+            fm = self.feature_map_drop(F.relu(self.bn1[i](self.conv[i](fm))))      # bs * 32 * 18 * 8
+            fm = fm.view(fm.shape[0], -1)       # bs * 4608
+            fm = F.relu(self.bn2[i](self.hidden_drop(self.fc[i](fm))))              # bs * 200
 
 
+        #  optional: maxpool
 
+        rrr = torch.mm(r_r, self.ent_real.weight.transpose(1, 0))  # bs * # ent
+        rii = torch.mm(r_i, self.ent_img.weight.transpose(1, 0))
+        iri = torch.mm(i_r, self.ent_img.weight.transpose(1, 0))
+        iir = torch.mm(i_i, self.ent_real.weight.transpose(1, 0))
 
-
-        ''' v1:
-               instead, e1_real : bs * 1 * dim
-                        e1_img :  bs * 1 *  dim
-                         rel_real: bs * 1 * dim
-                         rel_img: bs * 1 *  dim
-                     ==>  real :  bs * (1) *  2 * dim ,   img: bs * (1) * 2 * dim
-                     ==>  real + img :   bs * 2 * 2 * dim
-                     Conv2d .....   before torch.mm : bs * 200
-                     torch.mm:
-
-               '''
-
-        '''  v2:
-            real + img :   bs * 2 * dim * 2         Conv2d
-
-
-        '''
-
-        ''' v3:
-        real (e1 + rel):  bs * 2 * dim 
-        img ... ..... same
-
-        real => network:    get     bs * 200
-
-        img => network:     get     bs * 200
-
-        '''
-
-        # e1_embedded = self.entity_embedding(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)           # len(e1) *  1 * 20 * 10
-        # rel_embedded = self.relation_embedding(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)       # len(rel) * 1 * 20 * 10       len(e1) = len(rel)
-
-        e1_real = self.ent_real(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)           # bs * 1 * 20 * 10
-        e1_img = self.ent_img(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)             # bs * 1 * 20 * 10
-        rel_real = self.rel_real(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)         # bs * 1 * 20 * 10
-        rel_img = self.rel_img(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)           # bs * 1 * 20 * 10
-
-
-
-
-        # stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)                                  # len * 1 * 40 * 10
-
-        er = self.inp_drop(self.bn0(e1_real))       # bs * 1 * 20 * 10
-        ei = self.inp_drop(self.bn0(e1_img))
-        rr = self.inp_drop(self.bn0(rel_real))
-        ri = self.inp_drop(self.bn0(rel_img))
-
-
-        er = self.feature_map_drop(F.relu(self.bn1(self.conv1(er))))       # bs * 32 * 18 * 8
-        ei = self.feature_map_drop(F.relu(self.bn1(self.conv2(ei))))
-        rr = self.feature_map_drop(F.relu(self.bn1(self.conv3(rr))))
-        ri = self.feature_map_drop(F.relu(self.bn1(self.conv4(ri))))
-
-        er = er.view(er.shape[0], -1)     # bs * 4608
-        ei = ei.view(ei.shape[0], -1)
-        rr = rr.view(rr.shape[0], -1)
-        ri = ri.view(ri.shape[0], -1)
-
-        er = F.relu(self.bn2(self.hidden_drop(self.fc1(er))))       # bs * 200
-        ei = F.relu(self.bn2(self.hidden_drop(self.fc2(ei))))
-        rr = F.relu(self.bn2(self.hidden_drop(self.fc3(rr))))
-        ri = F.relu(self.bn2(self.hidden_drop(self.fc4(ri))))
-
-        rrr = torch.mm(er * rr, self.ent_real.weight.transpose(1,0))        # bs * # ent
-        rii = torch.mm(er * ri, self.ent_img.weight.transpose(1,0))
-        iri = torch.mm(ei * rr, self.ent_img.weight.transpose(1,0))
-        iir = torch.mm(ei * ri, self.ent_real.weight.transpose(1,0))
-
-        '''
-        er * rr = > Conv 
-        '''
+        # optional: rrr, ... , iir via a FC, instead of + and -
 
         pred = rrr + rii + iri - iir
 
-        '''
-        rrr, ... , iir via a FC 
-        '''
-
         pred += self.b.expand_as(pred)
-
-        # one more FC
-
-        # add epochs
 
         pred = torch.sigmoid(pred)
 
-
-
-        return pred         # len * # ent
-
-
+        return pred       # len * # ent
 
 
 
