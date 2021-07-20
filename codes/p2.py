@@ -106,3 +106,7 @@ print('\n\n\n')
 a = None
 if not a: print('andioan')
 
+print('\n\n\n')
+for i, a in enumerate([4,'anio', 0, 'pi']):
+    print(i, a)
+
