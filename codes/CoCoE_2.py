@@ -43,6 +43,7 @@ class ConvLayer(nn.Module):
         self.loss = torch.nn.BCELoss()  # modify: cosine embedding loss / triplet loss
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
 
+        self.nentity = self.entity_embedding.weight.shape[0]
         self.embedding_dim = self.entity_embedding.weight.shape[1]
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
