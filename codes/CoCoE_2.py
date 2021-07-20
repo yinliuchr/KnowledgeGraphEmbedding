@@ -24,18 +24,18 @@ from dataloader import TestDataset
 from ConvE import ConvModel
 
 class ConvLayer(nn.Module):
-    def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
+    def __init__(self, entity_embedding, relation_embedding, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
         super(ConvLayer, self).__init__()
-        self.model_name = model_name
-        self.nentity = nentity
-        self.nrelation = nrelation
+        # self.model_name = model_name
+        # self.nentity = nentity
+        # self.nrelation = nrelation
+        #
+        # self.entity_dim = hidden_dim
+        # self.relation_dim = hidden_dim
+        # self.embedding_dim = hidden_dim
 
-        self.entity_dim = hidden_dim
-        self.relation_dim = hidden_dim
-        self.embedding_dim = hidden_dim
-
-        self.entity_embedding = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
-        self.relation_embedding = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
+        self.entity_embedding = entity_embedding
+        self.relation_embedding = relation_embedding
 
         self.inp_drop = torch.nn.Dropout(input_drop)
         self.hidden_drop = torch.nn.Dropout(hidden_drop)
@@ -80,7 +80,7 @@ class ConvLayer(nn.Module):
         x = self.bn2(x)
         x = F.relu(x)  # bs * 200
 
-        return x        # len * # ent
+        return x
 
 class CoCoModel_2(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
@@ -98,6 +98,8 @@ class CoCoModel_2(nn.Module):
         self.rel_real = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0)
         self.rel_img = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0)
 
+
+
         self.inp_drop = torch.nn.Dropout(input_drop)
         self.hidden_drop = torch.nn.Dropout(hidden_drop)
         self.feature_map_drop = torch.nn.Dropout2d(feat_drop)
@@ -105,10 +107,10 @@ class CoCoModel_2(nn.Module):
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
-        self.conv_layer0 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer1 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer2 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer3 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer0 = ConvLayer(self.ent_real,self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer1 = ConvLayer(self.ent_real, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer2 = ConvLayer(self.ent_img, self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer3 = ConvLayer(self.ent_img, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
 
         '''
         self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
@@ -146,15 +148,15 @@ class CoCoModel_2(nn.Module):
 
     def forward(self, e1, rel):
 
-        e1_real = self.ent_real(e1)
-        e1_img = self.ent_img(e1)
-        rel_real = self.rel_real(rel)
-        rel_img = self.rel_img(rel)
+        # e1_real = self.ent_real(e1)         # bs * 200
+        # e1_img = self.ent_img(e1)
+        # rel_real = self.rel_real(rel)
+        # rel_img = self.rel_img(rel)
 
-        r_r = self.conv_layer0(e1_real, rel_real)
-        r_i = self.conv_layer1(e1_real, rel_img)
-        i_r = self.conv_layer2(e1_img, rel_real)
-        i_i = self.conv_layer3(e1_img, rel_img)
+        r_r = self.conv_layer0(e1, rel)       # bs * 200
+        r_i = self.conv_layer1(e1, rel)
+        i_r = self.conv_layer2(e1, rel)
+        i_i = self.conv_layer3(e1, rel)
 
         '''
         e1_real = self.ent_real(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
