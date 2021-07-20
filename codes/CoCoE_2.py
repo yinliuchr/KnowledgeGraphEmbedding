@@ -109,10 +109,10 @@ class CoCoModel_2(nn.Module):
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
-        self.conv_layer0 = ConvLayer(self.ent_real,self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer1 = ConvLayer(self.ent_real, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer2 = ConvLayer(self.ent_img, self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
-        self.conv_layer3 = ConvLayer(self.ent_img, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer0 = ConvLayer(self.ent_real,self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
+        self.conv_layer1 = ConvLayer(self.ent_real, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
+        self.conv_layer2 = ConvLayer(self.ent_img, self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
+        self.conv_layer3 = ConvLayer(self.ent_img, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
 
         '''
         self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
