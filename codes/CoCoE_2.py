@@ -23,6 +23,65 @@ from dataloader import TestDataset
 
 from ConvE import ConvModel
 
+class ConvLayer(nn.Module):
+    def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
+        super(ConvLayer, self).__init__()
+        self.model_name = model_name
+        self.nentity = nentity
+        self.nrelation = nrelation
+
+        self.entity_dim = hidden_dim
+        self.relation_dim = hidden_dim
+        self.embedding_dim = hidden_dim
+
+        self.entity_embedding = nn.Embedding(self.nentity, self.entity_dim, padding_idx=0 )
+        self.relation_embedding = nn.Embedding(self.nrelation, self.relation_dim, padding_idx=0 )
+
+        self.inp_drop = torch.nn.Dropout(input_drop)
+        self.hidden_drop = torch.nn.Dropout(hidden_drop)
+        self.feature_map_drop = torch.nn.Dropout2d(feat_drop)
+        self.loss = torch.nn.BCELoss()  # modify: cosine embedding loss / triplet loss
+        self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
+        self.emb_dim2 = self.embedding_dim // self.emb_dim1
+
+        self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
+        self.bn0 = torch.nn.BatchNorm2d(1)
+        self.bn1 = torch.nn.BatchNorm2d(32)
+        self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
+        self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
+        self.fc = torch.nn.Linear(hidden_size, self.embedding_dim)
+
+
+    def init(self):
+        xavier_normal_(self.entity_embedding.weight.data)
+        xavier_normal_(self.relation_embedding.weight.data)
+
+
+    def forward(self, e1, rel):
+
+        e1_embedded = self.entity_embedding(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)           # len(e1) *  1 * 20 * 10
+        rel_embedded = self.relation_embedding(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)       # len(rel) * 1 * 20 * 10       len(e1) = len(rel)
+
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)                                  # len * 1 * 40 * 10
+
+        stacked_inputs = self.bn0(stacked_inputs)                   # len * 1 * 40 * 10
+        x = self.inp_drop(stacked_inputs)
+        x = self.conv1(x)                                           # len * 32 * 38 * 8
+
+                                                                    # pooling ... len * 32 * 19 * 4
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+
+        x = x.view(x.shape[0], -1)                                  # len * 9728
+        x = self.fc(x)                                              # len * 200
+        x = self.hidden_drop(x)
+        x = self.bn2(x)
+        x = F.relu(x)  # bs * 200
+
+        return x        # len * # ent
+
 class CoCoModel_2(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
         super(CoCoModel_2, self).__init__()
@@ -46,13 +105,24 @@ class CoCoModel_2(nn.Module):
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
+        self.conv_layer0 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer1 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer2 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+        self.conv_layer3 = ConvLayer(model_name,nentity,nrelation,hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size)
+
+        '''
         self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
         self.conv2 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
         self.conv3 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
         self.conv4 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
         self.conv = [self.conv1, self.conv2, self.conv3, self.conv4]
 
-        self.bn0 = [torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1)]
+        self.bn00 = torch.nn.BatchNorm2d(1)
+        self.bn01 = torch.nn.BatchNorm2d(1)
+        self.bn02 = torch.nn.BatchNorm2d(1)
+        self.bn03 = torch.nn.BatchNorm2d(1)
+        
+            # = [torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1),torch.nn.BatchNorm2d(1)]
         self.bn1 = [torch.nn.BatchNorm2d(32), torch.nn.BatchNorm2d(32),torch.nn.BatchNorm2d(32),torch.nn.BatchNorm2d(32)]
         self.bn2 = [torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim),torch.nn.BatchNorm1d(self.embedding_dim)]
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
@@ -62,6 +132,8 @@ class CoCoModel_2(nn.Module):
         self.fc3 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc4 = torch.nn.Linear(hidden_size, self.embedding_dim)
         self.fc = [self.fc1, self.fc2, self.fc3, self.fc4]
+        '''
+
 
 
 
@@ -73,6 +145,18 @@ class CoCoModel_2(nn.Module):
 
 
     def forward(self, e1, rel):
+
+        e1_real = self.ent_real(e1)
+        e1_img = self.ent_img(e1)
+        rel_real = self.rel_real(rel)
+        rel_img = self.rel_img(rel)
+
+        r_r = self.conv_layer0(e1_real, rel_real)
+        r_i = self.conv_layer1(e1_real, rel_img)
+        i_r = self.conv_layer2(e1_img, rel_real)
+        i_i = self.conv_layer3(e1_img, rel_img)
+
+        '''
         e1_real = self.ent_real(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
         e1_img = self.ent_img(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
         rel_real = self.rel_real(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
@@ -93,7 +177,7 @@ class CoCoModel_2(nn.Module):
             fm = fm.view(fm.shape[0], -1)       # bs * 4608
             fm = F.relu(self.bn2[i](self.hidden_drop(self.fc[i](fm))))              # bs * 200
 
-
+        '''
         #  optional: maxpool
 
         rrr = torch.mm(r_r, self.ent_real.weight.transpose(1, 0))  # bs * # ent
