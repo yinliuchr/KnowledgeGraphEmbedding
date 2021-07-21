@@ -395,8 +395,10 @@ class KGEModel(nn.Module):
 
             with torch.no_grad():
                 for test_dataset in test_dataset_list:
-                    for positive_sample, negative_sample, filter_bias, mode in test_dataset:
-                        if args.cuda:
+                    for positive_sample, negative_sample, filter_bias, mode in test_dataset:                # pos_sample: bs * 3
+                        if args.cuda:                                                                       # neg_sample: bs * 256
+
+                                                                                                            # bs * (1 good trip, 256 bad trip)
                             positive_sample = positive_sample.cuda()
                             negative_sample = negative_sample.cuda()
                             filter_bias = filter_bias.cuda()
@@ -432,6 +434,7 @@ class KGEModel(nn.Module):
                                 'HITS@1': 1.0 if ranking <= 1 else 0.0,
                                 'HITS@3': 1.0 if ranking <= 3 else 0.0,
                                 'HITS@10': 1.0 if ranking <= 10 else 0.0,
+                                'HITS@1000': 1.0 if ranking <= 1000 else 0.0
                             })
 
                         if step % args.test_log_steps == 0:

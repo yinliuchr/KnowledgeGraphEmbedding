@@ -143,6 +143,8 @@ class CoCoModel_2(nn.Module):
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
 
         self.last_fc = torch.nn.Linear(4,1)
+        self.last_dropout= nn.Dropout(0.3)
+        self.last_bn = nn.BatchNorm1d(nentity)
 
 
 
@@ -190,21 +192,22 @@ class CoCoModel_2(nn.Module):
 
         #  optional: maxpool
 
-        rrr = torch.mm(r_r, self.ent_real.weight.transpose(1, 0))  # bs * # ent
-        rii = torch.mm(r_i, self.ent_img.weight.transpose(1, 0))
-        iri = torch.mm(i_r, self.ent_img.weight.transpose(1, 0))
-        iir = torch.mm(i_i, self.ent_real.weight.transpose(1, 0))
+        rrr = self.last_dropout(torch.mm(r_r, self.ent_real.weight.transpose(1, 0)))  # bs * # ent
+        rii = self.last_dropout(torch.mm(r_i, self.ent_img.weight.transpose(1, 0)))
+        iri = self.last_dropout(torch.mm(i_r, self.ent_img.weight.transpose(1, 0)))
+        iir = self.last_dropout(torch.mm(i_i, self.ent_real.weight.transpose(1, 0)))
+
+
 
         pred = torch.cat([rrr.unsqueeze(2),rii.unsqueeze(2), iri.unsqueeze(2), iir.unsqueeze(2)], dim=2)    # bs * # ent * 4
 
         # optional: rrr, ... , iir via a FC, instead of + and -
         # pred = rrr + rii + iri - iir
-        pred = self.last_fc(pred).squeeze()
+        pred = self.last_fc(pred).squeeze()     # bs * # ent
 
+        pred = F.relu(pred)
 
-        # question: where to use dropout
-
-        pred += self.b.expand_as(pred)
+        # pred += self.b.expand_as(pred)
         pred = torch.sigmoid(pred)
 
         return pred       # len * # ent
