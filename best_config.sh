@@ -20,6 +20,28 @@ bash run.sh train ConvE FB15k-237 0 18 128 256 200 9.0 1.0 0.003 20000 128
 
 bash run.sh train CoCo2 FB15k-237 0 19 128 256 200 9.0 1.0 0.001 40000 128
 
+bash run.sh train ConvE FB15k-237 0 20 128 256 200 9.0 1.0 0.003 40000 128
+
+
+# TransE
+bash run.sh train TransE FB15k 0 22 1024 256 1000 24.0 1.0 0.0001 150000 16
+bash run.sh train TransE FB15k-237 1 21 1024 256 1000 9.0 1.0 0.00005 100000 16
+bash run.sh train TransE wn18 0 23 512 1024 500 12.0 0.5 0.0001 80000 8
+# ComplEx
+bash run.sh train ComplEx FB15k 0 24 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     #
+bash run.sh train ComplEx FB15k-237 0 25 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train ComplEx wn18 1 26 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+# ConvE
+bash run.sh train ConvE FB15k-237 0 20 128 256 200 9.0 1.0 0.003 40000 128
+bash run.sh train ConvE FB15k 1 27 128 256 200 9.0 1.0 0.003 40000 128
+bash run.sh train ConvE wn18 1 28 128 256 200 9.0 1.0 0.003 40000 128
+
+# CoCo2
+
+
+
+
+
 
 
 

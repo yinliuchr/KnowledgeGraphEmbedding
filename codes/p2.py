@@ -110,3 +110,14 @@ print('\n\n\n')
 for i, a in enumerate([4,'anio', 0, 'pi']):
     print(i, a)
 
+print('\n\n\n')
+a = torch.tensor([[1,2,3],[4,5,6]])
+print(a.shape)
+print(a.unsqueeze(2).shape)
+
+print('\n\n\n')
+m = nn.MaxPool2d((3, 2), stride=(2, 1))
+input = torch.randn(20, 16, 50, 32)
+output = m(input)
+print(output.shape)
+

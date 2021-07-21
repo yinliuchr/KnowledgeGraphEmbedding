@@ -46,7 +46,9 @@ class ConvLayer(nn.Module):
         self.embedding_dim = self.entity_embedding.weight.shape[1]
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
-        self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=True)
+        self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
+        self.mpool = nn.MaxPool2d(2, stride=2)
+
         self.bn0 = torch.nn.BatchNorm2d(1)
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
@@ -64,25 +66,26 @@ class ConvLayer(nn.Module):
         e1_embedded = self.entity_embedding(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)           # len(e1) *  1 * 20 * 10
         rel_embedded = self.relation_embedding(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)       # len(rel) * 1 * 20 * 10       len(e1) = len(rel)
 
-        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)                                  # len * 1 * 40 * 10
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 1)                                  # len * 2 * 20 * 10
 
-        stacked_inputs = self.bn0(stacked_inputs)                   # len * 1 * 40 * 10
+        stacked_inputs = self.bn0(stacked_inputs)                   # len * 2 * 20 * 10
         x = self.inp_drop(stacked_inputs)
-        x = self.conv1(x)                                           # len * 32 * 38 * 8
+        x = self.conv1(x)                                           # len * 32 * 18 * 8
 
-                                                                    # pooling ... len * 32 * 19 * 4
+        x = self.mpool(x)                                           # len * 32 * 9 * 4
 
         x = self.bn1(x)
         x = F.relu(x)
         x = self.feature_map_drop(x)
 
-        x = x.view(x.shape[0], -1)                                  # len * 9728
+        x = x.view(x.shape[0], -1)                                  # len * 1152
         x = self.fc(x)                                              # len * 200
         x = self.hidden_drop(x)
         x = self.bn2(x)
         x = F.relu(x)  # bs * 200
 
         return x
+
 
 class CoCoModel_2(nn.Module):
     def __init__(self, model_name, nentity, nrelation, hidden_dim, input_drop, hidden_drop, feat_drop, emb_dim1, hidden_size):
@@ -109,10 +112,10 @@ class CoCoModel_2(nn.Module):
         self.emb_dim1 = emb_dim1             # this is from the original configuration in ConvE
         self.emb_dim2 = self.embedding_dim // self.emb_dim1
 
-        self.conv_layer0 = ConvLayer(self.ent_real,self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
-        self.conv_layer1 = ConvLayer(self.ent_real, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
-        self.conv_layer2 = ConvLayer(self.ent_img, self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
-        self.conv_layer3 = ConvLayer(self.ent_img, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 9728)
+        self.conv_layer0 = ConvLayer(self.ent_real,self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 1152)
+        self.conv_layer1 = ConvLayer(self.ent_real, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 1152)
+        self.conv_layer2 = ConvLayer(self.ent_img, self.rel_real, input_drop, hidden_drop, feat_drop, emb_dim1, 1152)
+        self.conv_layer3 = ConvLayer(self.ent_img, self.rel_img, input_drop, hidden_drop, feat_drop, emb_dim1, 1152)
 
         '''
         self.conv1 = torch.nn.Conv2d(2, 32, (3, 3), 1, 0, bias=True)
@@ -139,6 +142,8 @@ class CoCoModel_2(nn.Module):
         '''
         self.register_parameter('b', nn.Parameter(torch.zeros(self.nentity)))
 
+        self.last_fc = torch.nn.Linear(4,1)
+
 
 
     def init(self):
@@ -154,11 +159,6 @@ class CoCoModel_2(nn.Module):
         # e1_img = self.ent_img(e1)
         # rel_real = self.rel_real(rel)
         # rel_img = self.rel_img(rel)
-
-        r_r = self.conv_layer0(e1, rel)       # bs * 200
-        r_i = self.conv_layer1(e1, rel)
-        i_r = self.conv_layer2(e1, rel)
-        i_i = self.conv_layer3(e1, rel)
 
         '''
         e1_real = self.ent_real(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)  # bs * 1 * 20 * 10
@@ -182,6 +182,12 @@ class CoCoModel_2(nn.Module):
             fm = F.relu(self.bn2[i](self.hidden_drop(self.fc[i](fm))))              # bs * 200
 
         '''
+
+        r_r = self.conv_layer0(e1, rel)  # bs * 200
+        r_i = self.conv_layer1(e1, rel)
+        i_r = self.conv_layer2(e1, rel)
+        i_i = self.conv_layer3(e1, rel)
+
         #  optional: maxpool
 
         rrr = torch.mm(r_r, self.ent_real.weight.transpose(1, 0))  # bs * # ent
@@ -189,9 +195,15 @@ class CoCoModel_2(nn.Module):
         iri = torch.mm(i_r, self.ent_img.weight.transpose(1, 0))
         iir = torch.mm(i_i, self.ent_real.weight.transpose(1, 0))
 
-        # optional: rrr, ... , iir via a FC, instead of + and -
+        pred = torch.cat([rrr.unsqueeze(2),rii.unsqueeze(2), iri.unsqueeze(2), iir.unsqueeze(2)], dim=2)    # bs * # ent * 4
 
-        pred = rrr + rii + iri - iir
+        # optional: rrr, ... , iir via a FC, instead of + and -
+        # pred = rrr + rii + iri - iir
+        pred = self.last_fc(pred).squeeze()
+
+
+        # question: where to use dropout
+
         pred += self.b.expand_as(pred)
         pred = torch.sigmoid(pred)
 
