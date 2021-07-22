@@ -59,6 +59,8 @@ bash run.sh train CoCo2 wn18 1 40 1024 256 200 9.0 1.0 0.0002 40000 16
 
 bash run.sh train ComplEx wn18 0 41 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
 
+bash run_v2.sh train model dataset 0 80 1024 256 200
+
 
 
 # bash run.sh train RotatE FB15k    0       0      1024        256               1000         24.0    1.0   0.0001 150000         16               -de
