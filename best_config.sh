@@ -36,11 +36,12 @@ bash run.sh train ConvE FB15k 1 27 128 256 200 9.0 1.0 0.003 40000 128
 bash run.sh train ConvE FB15k-237 0 20 128 256 200 9.0 1.0 0.003 40000 128
 bash run.sh train ConvE wn18 1 28 128 256 200 9.0 1.0 0.003 40000 128
 
+
 # CoCo2
 bash run.sh train CoCo2 FB15k 0 29 1024 256 200 9.0 1.0 0.003 40000 16
-bash run.sh train CoCo2 FB15k 0 30 1024 256 200 9.0 1.0 0.001 40000 16
+bash run.sh train CoCo2 FB15k 1 30 1024 256 200 9.0 1.0 0.001 40000 16
 bash run.sh train CoCo2 FB15k 0 31 1024 256 200 9.0 1.0 0.0005 40000 16
-bash run.sh train CoCo2 FB15k 0 32 1024 256 200 9.0 1.0 0.0002 40000 16
+bash run.sh train CoCo2 FB15k 1 32 1024 256 200 9.0 1.0 0.0002 40000 16
 
 
 bash run.sh train CoCo2 FB15k-237 0 33 1024 256 200 9.0 1.0 0.003 40000 16

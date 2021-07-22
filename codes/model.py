@@ -195,16 +195,16 @@ class KGEModel(nn.Module):
         re_relation, im_relation = torch.chunk(relation, 2, dim=2)
         re_tail, im_tail = torch.chunk(tail, 2, dim=2)
 
-        if mode == 'head-batch':
-            re_score = re_relation * re_tail + im_relation * im_tail
-            im_score = re_relation * im_tail - im_relation * re_tail
-            score = re_head * re_score + im_head * im_score
+        if mode == 'head-batch':        #  re/im_relation, re/im_tail: bs * 1 * dim,  re/im_head: bs * 256 * dim
+            re_score = re_relation * re_tail + im_relation * im_tail        # re_score: bs * 1 * dim
+            im_score = re_relation * im_tail - im_relation * re_tail        # im_score: bs * 1 * dim
+            score = re_head * re_score + im_head * im_score                 # re/im_score: bs * 1 * dim, re/im_head: bs * 256 * dim, => score: bs * 256 * dim
         else:
             re_score = re_head * re_relation - im_head * im_relation
             im_score = re_head * im_relation + im_head * re_relation
             score = re_score * re_tail + im_score * im_tail
 
-        score = score.sum(dim = 2)
+        score = score.sum(dim = 2)          # score = bs * 256
         return score
 
     def RotatE(self, head, relation, tail, mode):
@@ -395,10 +395,10 @@ class KGEModel(nn.Module):
 
             with torch.no_grad():
                 for test_dataset in test_dataset_list:
-                    for positive_sample, negative_sample, filter_bias, mode in test_dataset:                # pos_sample: bs * 3
-                        if args.cuda:                                                                       # neg_sample: bs * 256
+                    for positive_sample, negative_sample, filter_bias, mode in test_dataset:
+                        if args.cuda:
 
-                                                                                                            # bs * (1 good trip, 256 bad trip)
+
                             positive_sample = positive_sample.cuda()
                             negative_sample = negative_sample.cuda()
                             filter_bias = filter_bias.cuda()
@@ -408,7 +408,7 @@ class KGEModel(nn.Module):
                         score = model((positive_sample, negative_sample), mode)
                         score += filter_bias
 
-                        # print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
+                        print('\n**************************\nScore_dim: ', score.size(), '\n**************************\n')
 
 
                         #Explicitly sort all the entities to ensure that there is no test exposure bias

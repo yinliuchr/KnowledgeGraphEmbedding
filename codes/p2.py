@@ -121,3 +121,14 @@ input = torch.randn(20, 16, 50, 32)
 output = m(input)
 print(output.shape)
 
+print('\n\n\n')
+a = torch.empty(2,6,10)
+b, c = torch.chunk(a,chunks=2, dim=0)
+print(b.shape, c.shape)
+
+print('\n\n\n')
+a = torch.rand(2,1,3)
+b = torch.rand(2,5,3)
+print(a,b)
+print((a * b).shape)
+
