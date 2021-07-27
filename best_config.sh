@@ -52,14 +52,14 @@ bash run.sh train CoCo2 FB15k-237 1 36 1024 256 200 9.0 1.0 0.0002 40000 16
 
 bash run.sh train CoCo2 wn18 1 37 1024 256 200 9.0 1.0 0.003 40000 16
 bash run.sh train CoCo2 wn18 1 38 1024 256 200 9.0 1.0 0.001 40000 16
-bash run.sh train CoCo2 wn18 1 39 1024 256 200 9.0 1.0 0.0005 40000 16
-bash run.sh train CoCo2 wn18 1 40 1024 256 200 9.0 1.0 0.0002 40000 16
+bash run.sh train CoCo2 wn18 0 39 1024 256 200 9.0 1.0 0.0005 40000 16
+bash run.sh train CoCo2 wn18 0 40 1024 256 200 9.0 1.0 0.0002 40000 16
 
 
 
 bash run.sh train ComplEx wn18 0 41 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
 
-bash run_v2.sh train model dataset 0 80 1024 256 200
+bash run_v2.sh train ConvE wn18 0 101 512 1024 500 200.0 1.0 0.001 10000 8 -de -dr -r 0.00001
 
 
 

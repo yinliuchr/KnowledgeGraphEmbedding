@@ -207,7 +207,7 @@ class CoCoModel_2(nn.Module):
 
         pred = F.relu(pred)
 
-        # pred += self.b.expand_as(pred)
+        pred += self.b.expand_as(pred)
         pred = torch.sigmoid(pred)
 
         return pred       # len * # ent
