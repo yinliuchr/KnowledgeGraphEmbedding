@@ -26,10 +26,8 @@ from CoCoE_2 import CoCoModel_2
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
-# from tensorboard import configure, log_value
-
-from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter()
+# from torch.utils.tensorboard import SummaryWriter
+# writer = SummaryWriter()
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -82,7 +80,6 @@ def parse_args(args=None):
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
 
-    parser.add_argument('--tensorboard', help='Log progress to TensorBoard', action='store_true')
 
 
 
