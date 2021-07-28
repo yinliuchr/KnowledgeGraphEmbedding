@@ -26,6 +26,11 @@ from CoCoE_2 import CoCoModel_2
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
+# from tensorboard import configure, log_value
+
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
+
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description='Training and Testing Knowledge Graph Embedding Models',
@@ -76,6 +81,8 @@ def parse_args(args=None):
     
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
+
+    parser.add_argument('--tensorboard', help='Log progress to TensorBoard', action='store_true')
 
 
 
@@ -259,7 +266,7 @@ def main(args):
     all_true_triples = train_triples + valid_triples + test_triples
 
 
-    if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'DistMult'}:
+    if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'ComplExC', 'DistMult'}:
         kge_model = KGEModel(
         model_name=args.model,
         nentity=nentity,

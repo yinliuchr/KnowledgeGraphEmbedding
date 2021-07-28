@@ -44,16 +44,37 @@ bash run.sh train CoCo2 FB15k 0 31 1024 256 200 9.0 1.0 0.0005 40000 16
 bash run.sh train CoCo2 FB15k 1 32 1024 256 200 9.0 1.0 0.0002 40000 16
 
 
-bash run.sh train CoCo2 FB15k-237 0 33 1024 256 200 9.0 1.0 0.003 40000 16
+bash run.sh train CoCo2 FB15k-237 0 33 1024 256 200 9.0 1.0 0.003 40000 16    # without 'b'   not as good as CoCo or CoCo2 with 'b'
 bash run.sh train CoCo2 FB15k-237 0 34 1024 256 200 9.0 1.0 0.001 40000 16
 bash run.sh train CoCo2 FB15k-237 1 35 1024 256 200 9.0 1.0 0.0005 40000 16
 bash run.sh train CoCo2 FB15k-237 1 36 1024 256 200 9.0 1.0 0.0002 40000 16
 
 
-bash run.sh train CoCo2 wn18 1 37 1024 256 200 9.0 1.0 0.003 40000 16
+bash run.sh train CoCo2 wn18 1 37 1024 256 200 9.0 1.0 0.003 40000 16       # without 'b' extremely bad
 bash run.sh train CoCo2 wn18 1 38 1024 256 200 9.0 1.0 0.001 40000 16
 bash run.sh train CoCo2 wn18 0 39 1024 256 200 9.0 1.0 0.0005 40000 16
 bash run.sh train CoCo2 wn18 0 40 1024 256 200 9.0 1.0 0.0002 40000 16
+
+bash run.sh train CoCo2 FB15k-237 0 43 1024 256 200 9.0 1.0 0.003 40000 16    # with 'b'
+bash run.sh train CoCo2 FB15k-237 0 44 1024 256 200 9.0 1.0 0.001 40000 16
+bash run.sh train CoCo2 FB15k-237 1 45 1024 256 200 9.0 1.0 0.0005 40000 16
+bash run.sh train CoCo2 FB15k-237 1 46 1024 256 200 9.0 1.0 0.0002 40000 16
+
+bash run.sh train CoCo2 FB15k-237 0 47 128 256 200 9.0 1.0 0.003 40000 128    # with 'b'
+bash run.sh train CoCo2 FB15k-237 0 48 128 256 200 9.0 1.0 0.001 40000 128
+bash run.sh train CoCo2 FB15k-237 0 49 128 256 200 9.0 1.0 0.0005 40000 128
+bash run.sh train CoCo2 FB15k-237 0 50 128 256 200 9.0 1.0 0.0002 40000 128
+
+#######################################################################################################################
+New idea
+# ComplEx  vs ComplExC
+bash run.sh train ComplEx FB15k 1 51 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     #
+bash run.sh train ComplEx FB15k-237 1 52 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train ComplEx wn18 1 53 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+
+bash run.sh train ComplExC FB15k 1 54 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     #
+bash run.sh train ComplExC FB15k-237 1 55 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train ComplExC wn18 1 56 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
 
 
 
