@@ -208,7 +208,7 @@ class KGEModel(nn.Module):
         score = score.sum(dim = 2)          # score = bs * 256
         return score
 
-    def ComplExC(self, head, relation, tail, mode):
+    def ComplExC(self, head, relation, tail, mode):             # rrr -rii - iri - iir
         re_head, im_head = torch.chunk(head, 2, dim=2)
         re_relation, im_relation = torch.chunk(relation, 2, dim=2)
         re_tail, im_tail = torch.chunk(tail, 2, dim=2)
@@ -220,7 +220,7 @@ class KGEModel(nn.Module):
         else:
             re_score = re_head * re_relation - im_head * im_relation
             im_score = re_head * im_relation + im_head * re_relation
-            score = re_score * re_tail + im_score * im_tail
+            score = re_score * re_tail - im_score * im_tail
 
         score = score.sum(dim = 2)          # score = bs * 256
         return score
