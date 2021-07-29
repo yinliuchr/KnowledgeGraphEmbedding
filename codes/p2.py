@@ -132,3 +132,10 @@ b = torch.rand(2,5,3)
 print(a,b)
 print((a * b).shape)
 
+print('\n\n\n')
+
+a = torch.nn.Embedding(3,5)
+print('Emb: ', a.weight)
+print(a.weight.detach().cpu().numpy())
+print(a)
+

@@ -19,6 +19,8 @@ from model import KGEModel
 
 from ConvE import ConvModel
 
+from ConvE_2 import Conv2
+
 from CoCoE import CoCoModel
 
 from CoCoE_2 import CoCoModel_2
@@ -124,7 +126,7 @@ def save_model(model, optimizer, save_variable_list, args):
         os.path.join(args.save_path, 'checkpoint')
     )
 
-    if args.model == 'ConvE':
+    if args.model in {'ConvE', 'ConvE2'}:
         entity_embedding = model.entity_embedding.weight.detach().cpu().numpy()
         relation_embedding = model.relation_embedding.weight.detach().cpu().numpy()
         np.save(os.path.join(args.save_path, 'entity_embedding'), entity_embedding)
@@ -283,6 +285,17 @@ def main(args):
         feat_drop=.2,
         emb_dim1=20,
         hidden_size=9728)
+    elif args.model =='ConvE2':
+        kge_model = Conv2(
+        model_name=args.model,
+        nentity=nentity,
+        nrelation=nrelation,
+        hidden_dim=args.hidden_dim,
+        input_drop=.2,
+        hidden_drop=.3,
+        feat_drop=.2,
+        emb_dim1=20,
+        hidden_size=9728)
     elif args.model == 'CoCo':
         kge_model = CoCoModel(
         model_name=args.model,
@@ -365,7 +378,7 @@ def main(args):
     else:
         logging.info('Ramdomly Initializing %s Model...' % args.model)
         init_step = 0
-        if args.model in {'ConvE', 'CoCo', 'CoCo2'}:
+        if args.model in {'ConvE','ConvE2', 'CoCo', 'CoCo2'}:
             kge_model.init()
 
 
