@@ -64,40 +64,41 @@ bash run.sh train CoCo2 wn18 0 40 1024 256 200 9.0 1.0 0.0002 40000 16
 # tmux ls
 # tmux kill-session -t myname
 
-bash run.sh train CoCo2 FB15k-237 0 43 1024 256 200 9.0 1.0 0.003 40000 16    # with 'b'
-bash run.sh train CoCo2 FB15k-237 0 44 1024 256 200 9.0 1.0 0.001 40000 16
-bash run.sh train CoCo2 FB15k-237 0 45 1024 256 200 9.0 1.0 0.0005 40000 16
-bash run.sh train CoCo2 FB15k-237 0 46 1024 256 200 9.0 1.0 0.0002 40000 16
+bash run.sh train CoCo2 FB15k-237 0 43 1024 256 200 9.0 1.0 0.003 40000 16    # with 'b'    # (10 15 24)
+bash run.sh train CoCo2 FB15k-237 0 44 1024 256 200 9.0 1.0 0.001 40000 16                  # (8, 12, 19)
+bash run.sh train CoCo2 FB15k-237 0 45 1024 256 200 9.0 1.0 0.0005 40000 16                 # (14, 19, 27)
+bash run.sh train CoCo2 FB15k-237 0 46 1024 256 200 9.0 1.0 0.0002 40000 16                 # (11, 13, 15)
 
-bash run.sh train CoCo2 FB15k-237 0 47 128 256 200 9.0 1.0 0.003 40000 128    # with 'b'
-bash run.sh train CoCo2 FB15k-237 0 48 128 256 200 9.0 1.0 0.001 40000 128
-bash run.sh train CoCo2 FB15k-237 0 49 128 256 200 9.0 1.0 0.0005 40000 128
-bash run.sh train CoCo2 FB15k-237 0 50 128 256 200 9.0 1.0 0.0002 40000 128
+
+
+bash run.sh train CoCo2 FB15k-237 0 60 128 256 200 9.0 1.0 0.005 40000 128                  # (11, 15, 22)
+
+bash run.sh train CoCo2 FB15k-237 0 47 128 256 200 9.0 1.0 0.003 40000 128    # with 'b'    # (15, 21, 31)
+bash run.sh train CoCo2 FB15k-237 0 48 128 256 200 9.0 1.0 0.001 40000 128                  # (13, 18, 25)
+bash run.sh train CoCo2 FB15k-237 0 49 128 256 200 9.0 1.0 0.0005 40000 128                 # (12, 14, 17)
+bash run.sh train CoCo2 FB15k-237 0 50 128 256 200 9.0 1.0 0.0002 40000 128                 # (6, 10, 14)
 
 #######################################################################################################################
 #  New idea
 # ComplEx  vs ComplExC
-bash run.sh train ComplEx FB15k 1 51 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     #
-bash run.sh train ComplEx FB15k-237 1 52 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
-bash run.sh train ComplEx wn18 1 53 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+bash run.sh train ComplEx FB15k 1 51 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002      # (70, 81, 88)
+bash run.sh train ComplEx FB15k-237 1 52 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001   # (23, 35, 51)
+bash run.sh train ComplEx wn18 1 53 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001           # (85, 92, 95)
 
-bash run.sh train ComplExC FB15k 1 54 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     #
-bash run.sh train ComplExC FB15k-237 1 55 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
-bash run.sh train ComplExC wn18 0 56 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+bash run.sh train ComplExC FB15k 1 54 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002     # (71, 81, 88)
+bash run.sh train ComplExC FB15k-237 1 55 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001  # (22, 34, 49)
+bash run.sh train ComplExC wn18 0 56 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001          # (59, 88, 94)
 
 #######################################################################################################################
 
 # ConvE vs ConvE2
-bash run.sh train ConvE FB15k-237 0 57 128 256 200 9.0 1.0 0.003 100000 128
-bash run.sh train ConvE2 FB15k-237 0 58 128 256 200 9.0 1.0 0.003 100000 128
-bash run.sh train ConvE2 FB15k-237 0 59 128 256 200 9.0 1.0 0.001 100000 128
+bash run.sh train ConvE FB15k-237 0 57 128 256 200 9.0 1.0 0.003 40000 128                # (18, 28, 44)
+bash run.sh train ConvE2 FB15k-237 0 58 128 256 200 9.0 1.0 0.003 100000 128              # (6, 11, 17)
+bash run.sh train ConvE2 FB15k-237 0 59 128 256 200 9.0 1.0 0.001 100000 128              # (2, 5, 12)
+
+bash run.sh train ConvE2 FB15k-237 0 61 128 256 200 9.0 1.0 0.005 40000 128
 
 
-
-
-bash run.sh train ComplEx wn18 0 41 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
-
-bash run_v2.sh train ConvE wn18 0 101 512 1024 500 200.0 1.0 0.001 10000 8 -de -dr -r 0.00001
 
 
 

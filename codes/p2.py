@@ -139,3 +139,12 @@ print('Emb: ', a.weight)
 print(a.weight.detach().cpu().numpy())
 print(a)
 
+
+print('\n\n\n')
+a = torch.rand(2,3)
+b = torch.rand(2,3)
+c = torch.rand(2,3)
+d = torch.rand(2,3)
+res = torch.stack((a,b,c,d), 2)
+print(res.shape)
+

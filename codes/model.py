@@ -58,18 +58,22 @@ class KGEModel(nn.Module):
             a=-self.embedding_range.item(), 
             b=self.embedding_range.item()
         )
-        
+
+
+        if model_name == 'ComplExD':
+            self.fc = nn.Linear(4,1)
+
         if model_name == 'pRotatE':
             self.modulus = nn.Parameter(torch.Tensor([[0.5 * self.embedding_range.item()]]))
         
         #Do not forget to modify this line when you add a new model in the "forward" function
-        if model_name not in ['TransE', 'DistMult', 'ComplEx', 'ComplExC', 'RotatE', 'pRotatE']:
+        if model_name not in ['TransE', 'DistMult', 'ComplEx', 'ComplExC', 'ComplExD', 'RotatE', 'pRotatE']:
             raise ValueError('model %s not supported' % model_name)
             
         if model_name == 'RotatE' and (not double_entity_embedding or double_relation_embedding):
             raise ValueError('RotatE should use --double_entity_embedding')
 
-        if model_name in {'ComplEx', 'ComplExC'}and (not double_entity_embedding or not double_relation_embedding):
+        if model_name in {'ComplEx', 'ComplExC', 'ComplExD'} and (not double_entity_embedding or not double_relation_embedding):
             raise ValueError(model_name + ' should use --double_entity_embedding and --double_relation_embedding')
         
     def forward(self, sample, mode='single'):
@@ -159,6 +163,7 @@ class KGEModel(nn.Module):
             'DistMult': self.DistMult,
             'ComplEx': self.ComplEx,
             'ComplExC': self.ComplExC,
+            'ComplExD': self.ComplExD,
             'RotatE': self.RotatE,
             'pRotatE': self.pRotatE
         }
@@ -223,6 +228,33 @@ class KGEModel(nn.Module):
             score = re_score * re_tail - im_score * im_tail
 
         score = score.sum(dim = 2)          # score = bs * 256
+        return score
+
+
+    def ComplExD(self, head, relation, tail, mode):          # rrr + rii + iri - iir
+        re_head, im_head = torch.chunk(head, 2, dim=2)
+        re_relation, im_relation = torch.chunk(relation, 2, dim=2)
+        re_tail, im_tail = torch.chunk(tail, 2, dim=2)
+
+        # if mode == 'head-batch':        #  re/im_relation, re/im_tail: bs * 1 * dim,  re/im_head: bs * 256 * dim
+        #     re_score = re_relation * re_tail + im_relation * im_tail        # re_score: bs * 1 * dim
+        #     im_score = re_relation * im_tail - im_relation * re_tail        # im_score: bs * 1 * dim
+        #     score = re_head * re_score + im_head * im_score                 # re/im_score: bs * 1 * dim, re/im_head: bs * 256 * dim, => score: bs * 256 * dim
+        # else:
+        #     re_score = re_head * re_relation - im_head * im_relation
+        #     im_score = re_head * im_relation + im_head * re_relation
+        #     score = re_score * re_tail + im_score * im_tail
+
+        rrr = re_head * re_relation * re_tail       # bs * 256 * dim
+        rii = re_head * im_relation * im_tail
+        iri = im_head * re_relation * im_tail
+        iir = im_head * im_relation * re_tail
+
+        res = torch.stack((rrr,rii, iri, iir), 3)   # bs * 256 * dim * 4
+
+        res = self.fc(res).squeeze()            # bs * 256 * dim
+
+        score = res.sum(dim = 2)          # score = bs * 256
         return score
 
     def RotatE(self, head, relation, tail, mode):
