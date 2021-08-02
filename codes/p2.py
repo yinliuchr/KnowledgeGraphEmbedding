@@ -148,3 +148,8 @@ d = torch.rand(2,3)
 res = torch.stack((a,b,c,d), 2)
 print(res.shape)
 
+print('\n\n\n')
+x = torch.zeros(2, 1, 2, 1, 2)
+y = x.squeeze(dim=3)
+print(y.size())
+
