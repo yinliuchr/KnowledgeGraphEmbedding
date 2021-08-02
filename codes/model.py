@@ -250,9 +250,16 @@ class KGEModel(nn.Module):
         iri = im_head * re_relation * im_tail
         iir = im_head * im_relation * re_tail
 
+
+
         res = torch.stack((rrr,rii, iri, iir), 3)   # bs * 256 * dim * 4
 
+        print('\n\n ######## \n\n rrr: ', rrr.shape)
+        print('\n\n ######## \n\n res: ', res.shape)
+
         res = self.fc(res).squeeze()            # bs * 256 * dim
+
+        print('\n\n ######## \n\n res: ', res.shape)
 
         score = res.sum(dim = 2)          # score = bs * 256
         return score
