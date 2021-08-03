@@ -59,15 +59,23 @@ class KGEModel(nn.Module):
             b=self.embedding_range.item()
         )
 
+        ##############################################################################################################
+        if model_name == 'DistMultC':
+            self.fc = nn.Linear(self.hidden_dim, 1)
+            self.register_parameter('u', nn.Parameter(torch.zeros(256)))
+        ##############################################################################################################
 
         if model_name == 'ComplExD':
             self.fc = nn.Linear(4,1)
+
+        if model_name == 'ComplExG':
+            self.fc = nn.Linear(8,1)
 
         if model_name == 'pRotatE':
             self.modulus = nn.Parameter(torch.Tensor([[0.5 * self.embedding_range.item()]]))
         
         #Do not forget to modify this line when you add a new model in the "forward" function
-        if model_name not in ['TransE', 'DistMult', 'ComplEx', 'ComplExC', 'ComplExD', 'RotatE', 'pRotatE']:
+        if model_name not in ['TransE', 'DistMult', ' DistMultC', 'ComplEx', 'ComplExC', 'ComplExD','ComplExG', 'RotatE', 'pRotatE']:
             raise ValueError('model %s not supported' % model_name)
             
         if model_name == 'RotatE' and (not double_entity_embedding or double_relation_embedding):
@@ -161,6 +169,7 @@ class KGEModel(nn.Module):
         model_func = {
             'TransE': self.TransE,
             'DistMult': self.DistMult,
+            'DistMultC': self.DistMultC,
             'ComplEx': self.ComplEx,
             'ComplExC': self.ComplExC,
             'ComplExD': self.ComplExD,
@@ -193,7 +202,17 @@ class KGEModel(nn.Module):
         score = score.sum(dim = 2)
         return score
 
-    # def ConvE(self, head, relation, tail, mode):
+    def DistMultC(self, head, relation, tail, mode):
+        if mode == 'head-batch':
+            score = head * (relation * tail)        # bs * 256 * dim
+        else:
+            score = (head * relation) * tail        # bs * 256 * dim
+
+        score = self.fc(score).squeeze(dim=2)       # bs * 256
+
+        score += self.u.expand_as(score)
+
+        return score
 
 
     def ComplEx(self, head, relation, tail, mode):          # rrr + rii + iri - iir
@@ -210,7 +229,7 @@ class KGEModel(nn.Module):
             im_score = re_head * im_relation + im_head * re_relation
             score = re_score * re_tail + im_score * im_tail
 
-        score = score.sum(dim = 2)          # score = bs * 256
+        score = score.sum(dim = 2)          # score = bs * 256,  ( bs * 256 * dim => bs * 256)
         return score
 
     def ComplExC(self, head, relation, tail, mode):             # rrr - rii - iri - iir
@@ -236,32 +255,48 @@ class KGEModel(nn.Module):
         re_relation, im_relation = torch.chunk(relation, 2, dim=2)
         re_tail, im_tail = torch.chunk(tail, 2, dim=2)
 
-        # if mode == 'head-batch':        #  re/im_relation, re/im_tail: bs * 1 * dim,  re/im_head: bs * 256 * dim
-        #     re_score = re_relation * re_tail + im_relation * im_tail        # re_score: bs * 1 * dim
-        #     im_score = re_relation * im_tail - im_relation * re_tail        # im_score: bs * 1 * dim
-        #     score = re_head * re_score + im_head * im_score                 # re/im_score: bs * 1 * dim, re/im_head: bs * 256 * dim, => score: bs * 256 * dim
-        # else:
-        #     re_score = re_head * re_relation - im_head * im_relation
-        #     im_score = re_head * im_relation + im_head * re_relation
-        #     score = re_score * re_tail + im_score * im_tail
-
-        rrr = re_head * re_relation * re_tail       # bs * 256 * dim
-        rii = re_head * im_relation * im_tail
-        iri = im_head * re_relation * im_tail
-        iir = im_head * im_relation * re_tail
-
-
+        if mode =='head-batch':
+            rrr = re_head * (re_relation * re_tail)       # bs * 256 * dim
+            rii = re_head * (im_relation * im_tail)
+            iri = im_head * (re_relation * im_tail)
+            iir = im_head * (im_relation * re_tail)
+        else:
+            rrr = (re_head * re_relation) * re_tail  # bs * 256 * dim
+            rii = (re_head * im_relation) * im_tail
+            iri = (im_head * re_relation) * im_tail
+            iir = (im_head * im_relation) * re_tail
 
         res = torch.stack((rrr,rii, iri, iir), 3)   # bs * 256 * dim * 4
-
-        # print('\n\n ######## \n\n rrr: ', rrr.shape)
-        # print('\n\n ######## \n\n res: ', res.shape)
 
         res = self.fc(res).squeeze(dim=3)            # bs * 256 * dim
 
         # print('\n\n ######## \n\n res: ', res.shape)
 
         score = res.sum(dim = 2)          # score = bs * 256
+        return score
+
+    def ComplExG(self, head, relation, tail, mode):
+        h1, h2 = torch.chunk(head, 2, dim=2)
+        r1, r2 = torch.chunk(relation, 2, dim=2)
+        t1, t2 = torch.chunk(tail, 2, dim=2)
+
+        a111 = h1 * r1 * t1
+        a112 = h1 * r1 * t2
+        a121 = h1 * r2 * t1
+        a122 = h1 * r2 * t2
+        a211 = h2 * r1 * t1
+        a212 = h2 * r1 * t2
+        a221 = h2 * r2 * t1
+        a222 = h2 * r2 * t2
+
+
+        res = torch.stack((a111, a112, a121, a122, a211, a212, a221, a222), 3)  # bs * 256 * dim * 4
+
+        res = self.fc(res).squeeze(dim=3)  # bs * 256 * dim
+
+        # print('\n\n ######## \n\n res: ', res.shape)
+
+        score = res.sum(dim=2)  # score = bs * 256
         return score
 
     def RotatE(self, head, relation, tail, mode):
