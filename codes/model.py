@@ -62,7 +62,7 @@ class KGEModel(nn.Module):
         ##############################################################################################################
         if model_name == 'DistMultC':
             self.fc = nn.Linear(self.hidden_dim, 1)
-            self.register_parameter('u', nn.Parameter(torch.zeros(256)))
+            # self.register_parameter('u', nn.Parameter(torch.zeros(256)))
         ##############################################################################################################
 
         if model_name == 'ComplExD':
@@ -210,7 +210,7 @@ class KGEModel(nn.Module):
 
         score = self.fc(score).squeeze(dim=2)       # bs * 256
 
-        score += self.u.expand_as(score)
+        # score += self.u.expand_as(score)
 
         return score
 
