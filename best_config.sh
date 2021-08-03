@@ -113,9 +113,9 @@ bash run.sh train ComplExD wn18 1 68 512 1024 500 200.0 1.0 0.001 80000 8 -de -d
 #######################################################################################################################
 # DistMult vs DistMultC  (haven't been run)
 bash run.sh train DistMult FB15k-237 0 71 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001
-bash run.sh train DistMultC FB15k-237 1 72 1024 256 2000 200.0 1.0 0.0005 100000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 72 1024 256 2000 200.0 1.0 0.0005 100000 16 -r 0.00001
 bash run.sh train DistMultC FB15k-237 0 73 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001
-bash run.sh train DistMultC FB15k-237 1 74 1024 256 2000 200.0 1.0 0.002 100000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 74 1024 256 2000 200.0 1.0 0.002 100000 16 -r 0.00001
 
 
 
