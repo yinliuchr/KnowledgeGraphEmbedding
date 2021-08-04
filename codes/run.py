@@ -265,7 +265,7 @@ def main(args):
     all_true_triples = train_triples + valid_triples + test_triples
 
 
-    if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'ComplExC','ComplExD', 'DistMult', 'DistMultC'}:
+    if args.model in {'RotatE', 'pRotatE', 'TransE', 'ComplEx', 'ComplExC','ComplExD','ComplExH', 'DistMult', 'DistMultC'}:
         kge_model = KGEModel(
         model_name=args.model,
         nentity=nentity,
