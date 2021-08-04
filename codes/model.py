@@ -75,13 +75,13 @@ class KGEModel(nn.Module):
             self.modulus = nn.Parameter(torch.Tensor([[0.5 * self.embedding_range.item()]]))
         
         #Do not forget to modify this line when you add a new model in the "forward" function
-        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'ComplExC', 'ComplExD','ComplExG', 'RotatE', 'pRotatE']:
+        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'ComplExC', 'ComplExD','ComplExH', 'RotatE', 'pRotatE']:
             raise ValueError('model %s not supported' % model_name)
             
         if model_name == 'RotatE' and (not double_entity_embedding or double_relation_embedding):
             raise ValueError('RotatE should use --double_entity_embedding')
 
-        if model_name in {'ComplEx', 'ComplExC', 'ComplExD'} and (not double_entity_embedding or not double_relation_embedding):
+        if model_name in {'ComplEx', 'ComplExC', 'ComplExD', 'ComplExH'} and (not double_entity_embedding or not double_relation_embedding):
             raise ValueError(model_name + ' should use --double_entity_embedding and --double_relation_embedding')
         
     def forward(self, sample, mode='single'):
@@ -173,6 +173,7 @@ class KGEModel(nn.Module):
             'ComplEx': self.ComplEx,
             'ComplExC': self.ComplExC,
             'ComplExD': self.ComplExD,
+            'ComplExH': self.ComplExH,
             'RotatE': self.RotatE,
             'pRotatE': self.pRotatE
         }
@@ -275,29 +276,56 @@ class KGEModel(nn.Module):
         score = res.sum(dim = 2)          # score = bs * 256
         return score
 
-    def ComplExG(self, head, relation, tail, mode):
+    def ComplExH(self, head, relation, tail, mode):
         h1, h2 = torch.chunk(head, 2, dim=2)
         r1, r2 = torch.chunk(relation, 2, dim=2)
         t1, t2 = torch.chunk(tail, 2, dim=2)
 
-        a111 = h1 * r1 * t1
-        a112 = h1 * r1 * t2
-        a121 = h1 * r2 * t1
-        a122 = h1 * r2 * t2
-        a211 = h2 * r1 * t1
-        a212 = h2 * r1 * t2
-        a221 = h2 * r2 * t1
-        a222 = h2 * r2 * t2
-
-
-        res = torch.stack((a111, a112, a121, a122, a211, a212, a221, a222), 3)  # bs * 256 * dim * 4
-
-        res = self.fc(res).squeeze(dim=3)  # bs * 256 * dim
-
-        # print('\n\n ######## \n\n res: ', res.shape)
-
-        score = res.sum(dim=2)  # score = bs * 256
+        if mode == 'head-batch':
+            a111 = h1 * (r1 * t1)
+            a112 = h1 * (r1 * t2)
+            a121 = h1 * (r2 * t1)
+            a122 = h1 * (r2 * t2)
+            a211 = h2 * (r1 * t1)
+            a212 = h2 * (r1 * t2)
+            a221 = h2 * (r2 * t1)
+            a222 = h2 * (r2 * t2)
+        else:
+            a111 = h1 * r1 * t1
+            a112 = h1 * r1 * t2
+            a121 = h1 * r2 * t1
+            a122 = h1 * r2 * t2
+            a211 = h2 * r1 * t1
+            a212 = h2 * r1 * t2
+            a221 = h2 * r2 * t1
+            a222 = h2 * r2 * t2
+        score = a111 + a112 - a121 + a122 - a211 - a212 + a221 - a222
+        score = score.sum(dim=2)
         return score
+
+    # def ComplExG(self, head, relation, tail, mode):
+    #     h1, h2 = torch.chunk(head, 2, dim=2)
+    #     r1, r2 = torch.chunk(relation, 2, dim=2)
+    #     t1, t2 = torch.chunk(tail, 2, dim=2)
+    #
+    #     a111 = h1 * r1 * t1
+    #     a112 = h1 * r1 * t2
+    #     a121 = h1 * r2 * t1
+    #     a122 = h1 * r2 * t2
+    #     a211 = h2 * r1 * t1
+    #     a212 = h2 * r1 * t2
+    #     a221 = h2 * r2 * t1
+    #     a222 = h2 * r2 * t2
+    #
+    #
+    #     res = torch.stack((a111, a112, a121, a122, a211, a212, a221, a222), 3)  # bs * 256 * dim * 4
+    #
+    #     res = self.fc(res).squeeze(dim=3)  # bs * 256 * dim
+    #
+    #     # print('\n\n ######## \n\n res: ', res.shape)
+    #
+    #     score = res.sum(dim=2)  # score = bs * 256
+    #     return score
 
     def RotatE(self, head, relation, tail, mode):
         # head (if corrupted): 1024 * 256 * ent_dim         (ent_dim = hidden_dim * 2)

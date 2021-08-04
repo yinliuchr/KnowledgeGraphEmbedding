@@ -91,12 +91,12 @@ bash run.sh train ComplExC wn18 0 56 512 1024 500 200.0 1.0 0.001 80000 8 -de -d
 
 #######################################################################################################################
 
-# ConvE vs ConvE2   (ConvE2 is very bad)
-bash run.sh train ConvE FB15k-237 0 57 128 256 200 9.0 1.0 0.003 40000 128                # (18, 28, 44)
-bash run.sh train ConvE2 FB15k-237 0 58 128 256 200 9.0 1.0 0.003 100000 128              # (6, 11, 17)
-bash run.sh train ConvE2 FB15k-237 0 59 128 256 200 9.0 1.0 0.001 100000 128              # (2, 5, 12)
-
-bash run.sh train ConvE2 FB15k-237 0 61 128 256 200 9.0 1.0 0.005 40000 128               # (2, 5, 12)
+## ConvE vs ConvE2   (ConvE2 is very bad)
+#bash run.sh train ConvE FB15k-237 0 57 128 256 200 9.0 1.0 0.003 40000 128                # (18, 28, 44)
+#bash run.sh train ConvE2 FB15k-237 0 58 128 256 200 9.0 1.0 0.003 100000 128              # (6, 11, 17)
+#bash run.sh train ConvE2 FB15k-237 0 59 128 256 200 9.0 1.0 0.001 100000 128              # (2, 5, 12)
+#
+#bash run.sh train ConvE2 FB15k-237 0 61 128 256 200 9.0 1.0 0.005 40000 128               # (2, 5, 12)
 
 
 #######################################################################################################################
@@ -105,17 +105,28 @@ bash run.sh train ComplExD FB15k 1 62 1024 256 1000 500.0 1.0 0.003 150000 16 -d
 bash run.sh train ComplExD FB15k 1 63 1024 256 1000 500.0 1.0 0.001 150000 16 -de -dr -r 0.000002
 bash run.sh train ComplExD FB15k 0 64 1024 256 1000 500.0 1.0 0.0005 150000 16 -de -dr -r 0.000002
 
+bash run.sh train ComplExD FB15k 0 65 1024 256 1000 500.0 1.0 0.01 150000 16 -de -dr -r 0.000002
+
+
 
 bash run.sh train ComplExD FB15k-237 1 67 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
 bash run.sh train ComplExD wn18 1 68 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
 
 
 #######################################################################################################################
-# DistMult vs DistMultC  (haven't been run)
-bash run.sh train DistMult FB15k-237 0 71 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001
+# DistMult vs DistMultC
+bash run.sh train DistMult FB15k-237 0 71 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001    # (22, 33, 48)
 bash run.sh train DistMultC FB15k-237 0 72 1024 256 2000 200.0 1.0 0.0005 100000 16 -r 0.00001
-bash run.sh train DistMultC FB15k-237 0 73 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001
-bash run.sh train DistMultC FB15k-237 0 74 1024 256 2000 200.0 1.0 0.002 100000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 73 1024 256 2000 200.0 1.0 0.001 100000 16 -r 0.00001   # not run
+bash run.sh train DistMultC FB15k-237 0 74 1024 256 2000 200.0 1.0 0.002 100000 16 -r 0.00001   # not run
+
+bash run.sh train DistMultC FB15k-237 0 75 1024 256 400 200.0 1.0 0.01 20000 16 -r 0.00001      # (13, 24, 38)
+bash run.sh train DistMultC FB15k-237 0 76 256 256 400 200.0 1.0 0.004 40000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 77 256 256 400 200.0 1.0 0.002 40000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 78 256 256 400 200.0 1.0 0.001 40000 16 -r 0.00001
+
+bash run.sh train DistMultC FB15k-237 0 79 1024 256 400 200.0 1.0 0.05 40000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 80 1024 256 400 200.0 1.0 0.05 40000 16 -r 0.00001
 
 
 
