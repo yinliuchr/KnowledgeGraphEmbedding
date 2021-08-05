@@ -128,13 +128,37 @@ bash run.sh train DistMultC FB15k-237 0 78 256 256 400 200.0 1.0 0.001 40000 16 
 bash run.sh train DistMultC FB15k-237 1 79 1024 256 400 200.0 1.0 0.05 40000 16 -r 0.00001
 bash run.sh train DistMultC FB15k-237 1 80 1024 256 400 200.0 1.0 0.1 40000 16 -r 0.00001
 
+bash run.sh train DistMultC FB15k-237 1 83 1024 256 400 200.0 1.0 0.4 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 84 1024 256 400 200.0 1.0 0.2 80000 16 -r 0.00001
+
+bash run.sh train DistMultC FB15k-237 1 85 1024 256 400 200.0 1.0 0.05 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 86 1024 256 400 200.0 1.0 0.08 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 87 1024 256 400 200.0 1.0 0.1 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 88 1024 256 400 200.0 1.0 0.12 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 89 1024 256 400 200.0 1.0 0.15 80000 16 -r 0.00001
+
+bash run.sh train DistMultC FB15k-237 1 90 1024 256 1000 200.0 1.0 0.05 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 91 1024 256 1000 200.0 1.0 0.08 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 92 1024 256 1000 200.0 1.0 0.1 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 93 1024 256 1000 200.0 1.0 0.12 80000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 94 1024 256 1000 200.0 1.0 0.15 80000 16 -r 0.00001
+
+
+
+
 #######################################################################################################################
 # ComplExH (play with all 8 different combinations of Hermitian product Variant <head, relation, tail> (Re & Img)
 
-bash run.sh train ComplExH FB15k-237 1 81 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001   # (23, 35, 51)
-bash run.sh train ComplExH FB15k-237 1 82 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001   # (23, 35, 51)
+bash run.sh train ComplExH FB15k-237 1 81 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train ComplExH FB15k-237 0 82 1024 256 500 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
 
 
+
+
+
+#######################################################################################################################
+bash run.sh train ComplEx FB15k-237 0 101 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 0 102 1024 256 1000 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
 
 #######################################################################################################################
 #######################################################################################################################

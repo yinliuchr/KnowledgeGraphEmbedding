@@ -44,6 +44,10 @@ class KGEModel(nn.Module):
         
         self.entity_dim = hidden_dim*2 if double_entity_embedding else hidden_dim
         self.relation_dim = hidden_dim*2 if double_relation_embedding else hidden_dim
+
+        if model_name == 'QuarterNion':
+            self.entity_dim = hidden_dim * 4
+            self.relation_dim = hidden_dim * 4
         
         self.entity_embedding = nn.Parameter(torch.zeros(nentity, self.entity_dim))
         nn.init.uniform_(
@@ -75,13 +79,13 @@ class KGEModel(nn.Module):
             self.modulus = nn.Parameter(torch.Tensor([[0.5 * self.embedding_range.item()]]))
         
         #Do not forget to modify this line when you add a new model in the "forward" function
-        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'ComplExC', 'ComplExD','ComplExH', 'RotatE', 'pRotatE']:
+        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'QuarterNion', 'ComplExC', 'ComplExD','ComplExH', 'RotatE', 'pRotatE']:
             raise ValueError('model %s not supported' % model_name)
             
         if model_name == 'RotatE' and (not double_entity_embedding or double_relation_embedding):
             raise ValueError('RotatE should use --double_entity_embedding')
 
-        if model_name in {'ComplEx', 'ComplExC', 'ComplExD', 'ComplExH'} and (not double_entity_embedding or not double_relation_embedding):
+        if model_name in {'ComplEx', 'QuarterNion', 'ComplExC', 'ComplExD', 'ComplExH'} and (not double_entity_embedding or not double_relation_embedding):
             raise ValueError(model_name + ' should use --double_entity_embedding and --double_relation_embedding')
         
     def forward(self, sample, mode='single'):
@@ -171,6 +175,7 @@ class KGEModel(nn.Module):
             'DistMult': self.DistMult,
             'DistMultC': self.DistMultC,
             'ComplEx': self.ComplEx,
+            'QuarterNion': self.QuarterNion,
             'ComplExC': self.ComplExC,
             'ComplExD': self.ComplExD,
             'ComplExH': self.ComplExH,
@@ -232,6 +237,30 @@ class KGEModel(nn.Module):
 
         score = score.sum(dim = 2)          # score = bs * 256,  ( bs * 256 * dim => bs * 256)
         return score
+
+
+    def QuarterNion(self, head, relation, tail, mode):      # Re < h, r, t* >
+        h1, h2, h3, h4 = torch.chunk(head, 4, dim=2)
+        r1, r2, r3, r4 = torch.chunk(relation, 4, dim=2)
+        t1, t2, t3, t4 = torch.chunk(tail, 4, dim=2)
+        if mode == 'head-batch':  # first compute  s = < r, t* > =  < (r1 + r2 i +  r3 j + r4 k), ( t1 - t2 i - t3 j - t4 k) >
+            s1 = r1 * t1 + r2 * t2 + r3 * t3 + r4 * t4          # real part
+            s2 = - r1 * t2 + r2 * t1 - r3 * t4 + r4 * t3        # i part
+            s3 = - r1 * t3 + r3 * t1 + r2 * t4 - r4 * t2        # j part
+            s4 = - r1 * t4 + r4 * t1 - r2 * t3 + r3 * t2        # k part
+            # now compute RE < (h1 + h2 i + h3 j + h4 k), (s1 + s2 i + s3 j + s4 k) >
+            score = h1 * s1 - h2 * s2 - h3 * s3 - h4 * s4
+        else:       # first compute <h, r> = < (h1 + h2 i + h3 j + h4 k), (r1 + r2 i + r3 j + r4 k) >
+            s1 = h1 * r1 - h2 * r2 - h3 * r3 - h4 * r4
+            s2 = h1 * r2 + h2 * r1 + h3 * r4 - h4 * r3
+            s3 = h1 * r3 + h3 * r1 - h2 * r4 + h4 * r2
+            s4 = h1 * r4 + h4 * r1 + h2 * r3 - h3 * r2
+            # now compute Re <s, t*> = Re < (s1 + s2 i + s3 j + s4 k), (t1 - t2 i - t3 j - t4 k) >
+            score = s1 * t1 + s2 * t2 + s3 * t3 + s4 * t4
+
+        score = score.sum(dim=2)
+        return score
+
 
     def ComplExC(self, head, relation, tail, mode):             # rrr - rii - iri - iir
         re_head, im_head = torch.chunk(head, 2, dim=2)
