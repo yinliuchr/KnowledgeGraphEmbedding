@@ -170,9 +170,11 @@ bash run.sh train QuarterNion FB15k-237 0 103 1024 256 1000 200.0 1.0 0.001 1000
 
 bash run.sh train QuarterNion FB15k-237 0 104 1024 256 1000 200.0 1.0 0.0002 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 0 105 1024 256 1000 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
-bash run.sh train QuarterNion FB15k-237 0 106 1024 256 1000 200.0 1.0 0.0008 100000 16 -de -dr -r 0.00001
-bash run.sh train QuarterNion FB15k-237 0 107 1024 256 1000 200.0 1.0 0.002 100000 16 -de -dr -r 0.00001
-bash run.sh train QuarterNion FB15k-237 0 108 1024 256 1000 200.0 1.0 0.005 100000 16 -de -dr -r 0.00001
+
+
+bash run.sh train QuarterNion FB15k-237 1 106 1024 256 1000 200.0 1.0 0.0008 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 107 1024 256 1000 200.0 1.0 0.002 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 108 1024 256 1000 200.0 1.0 0.005 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 0 109 1024 256 1000 200.0 1.0 0.008 100000 16 -de -dr -r 0.00001
 
 

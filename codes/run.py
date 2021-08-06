@@ -330,6 +330,10 @@ def main(args):
     print(params)
     print(np.sum(params))
 
+    logging.info('**********************************************************************************************')
+    logging.info('Number of trainable parameters: %d' % (np.sum(params)))
+    logging.info('**********************************************************************************************')
+
 
     if args.cuda:
         kge_model = kge_model.cuda()
