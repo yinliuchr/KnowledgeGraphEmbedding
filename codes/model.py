@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 import logging
+import math
 
 import numpy as np
 
@@ -48,6 +49,10 @@ class KGEModel(nn.Module):
         if model_name == 'QuarterNion':
             self.entity_dim = hidden_dim * 4
             self.relation_dim = hidden_dim * 4
+
+        if model_name == 'QuarterRotatE':
+            self.entity_dim = hidden_dim * 3
+            self.relation_dim = hidden_dim * 4
         
         self.entity_embedding = nn.Parameter(torch.zeros(nentity, self.entity_dim))
         nn.init.uniform_(
@@ -79,7 +84,7 @@ class KGEModel(nn.Module):
             self.modulus = nn.Parameter(torch.Tensor([[0.5 * self.embedding_range.item()]]))
         
         #Do not forget to modify this line when you add a new model in the "forward" function
-        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'QuarterNion', 'ComplExC', 'ComplExD','ComplExH', 'RotatE', 'pRotatE']:
+        if model_name not in ['TransE', 'DistMult', 'DistMultC', 'ComplEx', 'QuarterNion', 'ComplExC', 'ComplExD','ComplExH', 'RotatE', 'QuarterRotatE', 'pRotatE']:
             raise ValueError('model %s not supported' % model_name)
             
         if model_name == 'RotatE' and (not double_entity_embedding or double_relation_embedding):
@@ -180,6 +185,7 @@ class KGEModel(nn.Module):
             'ComplExD': self.ComplExD,
             'ComplExH': self.ComplExH,
             'RotatE': self.RotatE,
+            'QuarterRotatE': self.QuarterRotatE,
             'pRotatE': self.pRotatE
         }
         
@@ -390,6 +396,50 @@ class KGEModel(nn.Module):
 
         score = self.gamma.item() - score.sum(dim = 2)              # 1024 * 256
         return score
+
+    def QuarterRotatE(self, head, relation, tail, mode):
+        pi = 3.14159265358979323846
+        h1, h2, h3 = torch.chunk(head, 3, dim=2)        # head
+        t1, t2, t3 = torch.chunk(tail, 3, dim=2)        # tail
+
+        q0, q1, q2, q3 = torch.chunk(relation, 4, dim=2)    # relation, seen as a quarternion
+        qn = math.sqrt(q0 ** 2 + q1 ** 2 + q2 ** 2 + q3 ** 2)
+        q0, q1, q2, q3 = q0 / qn, q1 / qn, q2 / qn, q3 / qn     # q = q0 + (q1 i + q2 j + q3 k) is a unit quarternion
+
+        if mode == 'head-batch':
+            q1, q2, q3 = -q1, -q2, -q3          # this is important as tail should rotate back
+            coeff1 = q0 ** 2 - (q1**2 + q2**2 + q3**2)
+            coeff2 = 2 * (q1 * t1 + q2 * t2 + q3 * t3)
+            coeff3 = 2 * q0
+            # rot_tail = coeff1 * vec(t) + coeff2 * vec(q) + coeff3 * (vec(q) x vec(t))
+            rot_tail_1 = coeff1 * t1 + coeff2 * q1 + coeff3 * (q2 * t3 - q3 * t2)
+            rot_tail_2 = coeff1 * t2 + coeff2 * q2 + coeff3 * (q3 * t1 - q1 * t3)
+            rot_tail_3 = coeff1 * t3 + coeff2 * q3 + coeff3 * (q1 * t2 - q2 * t1)
+
+            dif1 = h1 - rot_tail_1
+            dif2 = h2 - rot_tail_2
+            dif3 = h3 - rot_tail_3
+
+        else:
+            coeff1 = q0 ** 2 - (q1 ** 2 + q2 ** 2 + q3 ** 2)
+            coeff2 = 2 * (q1 * h1 + q2 * h2 + q3 * h3)
+            coeff3 = 2 * q0
+            # rot_head = coeff1 * vec(h) + coeff2 * vec(q) + coeff3 * (vec(q) x vec(h))
+            rot_head_1 = coeff1 * h1 + coeff2 * q1 + coeff3 * (q2 * h3 - q3 * h2)
+            rot_head_2 = coeff1 * h2 + coeff2 * q2 + coeff3 * (q3 * h1 - q1 * h3)
+            rot_head_3 = coeff1 * h3 + coeff2 * q3 + coeff3 * (q1 * h2 - q2 * h1)
+
+            dif1 = t1 - rot_head_1
+            dif2 = t2 - rot_head_2
+            dif3 = t3 - rot_head_3
+
+        score = torch.stack([dif1, dif2, dif3], dim=0)
+        score = score.norm(dim=0)
+        score = self.gamma.item() - score.sum(dim=2)
+        return score
+
+
+
 
     def pRotatE(self, head, relation, tail, mode):
         pi = 3.14159262358979323846

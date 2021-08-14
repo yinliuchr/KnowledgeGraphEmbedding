@@ -148,6 +148,18 @@ bash run.sh train DistMultC FB15k-237 1 96 1024 256 200 200.0 1.0 0.1 40000 16 -
 bash run.sh train DistMultC FB15k-237 1 97 1024 256 600 200.0 1.0 0.1 40000 16 -r 0.00001
 bash run.sh train DistMultC FB15k-237 1 98 1024 256 800 200.0 1.0 0.1 40000 16 -r 0.00001
 
+bash run.sh train DistMultC FB15k-237 0 201 1024 100 200 200.0 1.0 0.1 60000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 0 202 1024 200 200 200.0 1.0 0.1 60000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 203 1024 300 200 200.0 1.0 0.1 60000 16 -r 0.00001
+bash run.sh train DistMultC FB15k-237 1 204 1024 400 200 200.0 1.0 0.1 60000 16 -r 0.00001
+
+bash run.sh train DistMultC FB15k-237 0 205 1024 200 200 200.0 1.0 0.1 100000 16 -r 0.000001
+bash run.sh train DistMultC FB15k-237 0 206 1024 200 200 200.0 1.0 0.1 100000 16 -r 0.000002
+bash run.sh train DistMultC FB15k-237 0 207 1024 200 200 200.0 1.0 0.1 100000 16 -r 0.000005
+bash run.sh train DistMultC FB15k-237 1 208 1024 200 200 200.0 1.0 0.1 100000 16 -r 0.00002
+bash run.sh train DistMultC FB15k-237 1 209 1024 200 200 200.0 1.0 0.1 100000 16 -r 0.00005
+
+
 
 
 
@@ -170,13 +182,42 @@ bash run.sh train QuarterNion FB15k-237 0 103 1024 256 1000 200.0 1.0 0.001 1000
 
 bash run.sh train QuarterNion FB15k-237 0 104 1024 256 1000 200.0 1.0 0.0002 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 0 105 1024 256 1000 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
-
-
 bash run.sh train QuarterNion FB15k-237 1 106 1024 256 1000 200.0 1.0 0.0008 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 1 107 1024 256 1000 200.0 1.0 0.002 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 1 108 1024 256 1000 200.0 1.0 0.005 100000 16 -de -dr -r 0.00001
 bash run.sh train QuarterNion FB15k-237 0 109 1024 256 1000 200.0 1.0 0.008 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 0 110 1024 256 1000 200.0 1.0 0.0001 100000 16 -de -dr -r 0.00001
 
+bash run.sh train QuarterNion FB15k-237 0 111 1024 256 500 200.0 1.0 0.0001 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 112 1024 256 500 200.0 1.0 0.0002 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 113 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 114 1024 256 500 200.0 1.0 0.001 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 115 1024 256 500 200.0 1.0 0.002 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 116 1024 256 500 200.0 1.0 0.005 100000 16 -de -dr -r 0.00001
+
+bash run.sh train QuarterNion FB15k-237 0 117 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.000002
+bash run.sh train QuarterNion FB15k-237 0 118 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.000005
+bash run.sh train QuarterNion FB15k-237 0 119 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.000008
+bash run.sh train QuarterNion FB15k-237 1 120 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00002
+bash run.sh train QuarterNion FB15k-237 1 121 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00005
+bash run.sh train QuarterNion FB15k-237 1 122 1024 256 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00008
+
+bash run.sh train QuarterNion FB15k-237 0 133 1024 100 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 134 1024 200 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
+bash run.sh train QuarterNion FB15k-237 1 135 1024 300 500 200.0 1.0 0.0005 100000 16 -de -dr -r 0.00001
+
+
+#######################################################################################################################
+# QuarterNion vs ComplEx on wn18
+bash run.sh train ComplEx     wn18 0 141 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+bash run.sh train QuarterNion wn18 1 142 512 1024 250 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+
+bash run.sh train QuarterNion wn18 1 143 512 1024 500 200.0 1.0 0.001 80000 8 -de -dr -r 0.00001
+
+#######################################################################################################################
+# QuarterRotatE vs RotatE
+bash run.sh train RotatE FB15k-237 0 151 1024 256 1000 9.0 1.0 0.00005 100000 16 -de
+bash run.sh train QuarterRotatE FB15k-237 1 152 1024 256 1000 9.0 1.0 0.00005 100000 16 -de
 
 
 

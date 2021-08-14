@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import json
 import logging
+import math
 import os
 import random
 
@@ -154,3 +155,6 @@ y = x.squeeze(dim=3)
 print(y.size())
 
 print('\n\n\n')
+
+a = 9.0
+print(math.sqrt(a))
