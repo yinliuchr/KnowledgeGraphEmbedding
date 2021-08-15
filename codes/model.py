@@ -403,7 +403,7 @@ class KGEModel(nn.Module):
         t1, t2, t3 = torch.chunk(tail, 3, dim=2)        # tail
 
         q0, q1, q2, q3 = torch.chunk(relation, 4, dim=2)    # relation, seen as a quarternion
-        qn = math.sqrt(q0 ** 2 + q1 ** 2 + q2 ** 2 + q3 ** 2)
+        qn = torch.sqrt(q0 ** 2 + q1 ** 2 + q2 ** 2 + q3 ** 2)
         q0, q1, q2, q3 = q0 / qn, q1 / qn, q2 / qn, q3 / qn     # q = q0 + (q1 i + q2 j + q3 k) is a unit quarternion
 
         if mode == 'head-batch':
